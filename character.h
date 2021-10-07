@@ -9,22 +9,24 @@
 #include "display.h"
 
 //Character movement restrictions
-#define LEFT_BOUNDARY     1 //Column
-#define RIGHT_BOUNDARY    3 //Column
-#define UP_BOUNDARY       1 //Row
-#define DOWN_BOUNDARY     5 //Row
+#define LEFT_BOUNDARY     0 //Column
+#define RIGHT_BOUNDARY    4 //Column
+#define UP_BOUNDARY       0 //Row
+#define DOWN_BOUNDARY     6 //Row
 
 //Default starting coordinates
 #define DEFAULT_X         2
 #define DEFAULT_Y         3
 
-struct position_s
-{
+typedef struct {
    uint8_t x, y;
-};
+} position_t;
 
 //Create the character at the default starting position
 void character_init(void);
+
+//Give game.c ability to access player position
+position_t get_player_pos(void);
 
 //Move the character in the given direction, restricted by boundary
 void move_left(void);
