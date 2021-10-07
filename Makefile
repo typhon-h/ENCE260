@@ -43,7 +43,7 @@ timer.o: ../../drivers/avr/timer.c ../../drivers/avr/system.h ../../drivers/avr/
 character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-wall.o: wall.c wall.h ../../drivers/display.h character.h
+wall.o: wall.c wall.h ../../drivers/display.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 # Link: create ELF output file from object files.
