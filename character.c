@@ -8,58 +8,57 @@
 #include "navswitch.h"
 
 //Global character position
-struct position_s pos = { .x = DEFAULT_X, .y = DEFAULT_Y };
-
+position_t player_pos = { .x = DEFAULT_X, .y = DEFAULT_Y };
 
 void character_init()
 {
-   display_pixel_set(pos.x, pos.y, 1);
+   display_pixel_set(player_pos.x, player_pos.y, 1);
 }
 
+position_t get_player_pos(void)
+{
+   return player_pos;
+}
 
 void move_left()
 {
-   if (LEFT_BOUNDARY < pos.x)
+   if (LEFT_BOUNDARY < player_pos.x)
    {
-      display_pixel_set(pos.x, pos.y, 0);
-      pos.x -= 1;
-      display_pixel_set(pos.x, pos.y, 1);
+      display_pixel_set(player_pos.x, player_pos.y, 0);
+      player_pos.x -= 1;
+      display_pixel_set(player_pos.x, player_pos.y, 1);
    }
 }
-
 
 void move_right()
 {
-   if (RIGHT_BOUNDARY > pos.x)
+   if (RIGHT_BOUNDARY > player_pos.x)
    {
-      display_pixel_set(pos.x, pos.y, 0);
-      pos.x += 1;
-      display_pixel_set(pos.x, pos.y, 1);
+      display_pixel_set(player_pos.x, player_pos.y, 0);
+      player_pos.x += 1;
+      display_pixel_set(player_pos.x, player_pos.y, 1);
    }
 }
-
 
 void move_up()
 {
-   if (UP_BOUNDARY < pos.y)
+   if (UP_BOUNDARY < player_pos.y)
    {
-      display_pixel_set(pos.x, pos.y, 0);
-      pos.y -= 1;
-      display_pixel_set(pos.x, pos.y, 1);
+      display_pixel_set(player_pos.x, player_pos.y, 0);
+      player_pos.y -= 1;
+      display_pixel_set(player_pos.x, player_pos.y, 1);
    }
 }
-
 
 void move_down()
 {
-   if (DOWN_BOUNDARY > pos.y)
+   if (DOWN_BOUNDARY > player_pos.y)
    {
-      display_pixel_set(pos.x, pos.y, 0);
-      pos.y += 1;
-      display_pixel_set(pos.x, pos.y, 1);
+      display_pixel_set(player_pos.x, player_pos.y, 0);
+      player_pos.y += 1;
+      display_pixel_set(player_pos.x, player_pos.y, 1);
    }
 }
-
 
 void character_update()
 {
