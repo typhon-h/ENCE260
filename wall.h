@@ -8,17 +8,12 @@
 #define WALL_H
 
 #include "display.h"
-#include "character.h"
 
 /*  Create wall bitmap with a hole
  *  @param SIZE size of the whole in pixels //binary 0b00000001 to 0b00001111
  *  @param SHIFT position of the whole within the wall // integer 0 to 7
  */
 #define GENERATE_HOLE(SIZE, SHIFT)    (~(SIZE << (SHIFT)))
-
-// Max number of walls stored at a time
-#define MAX_COL_WALLS          2
-#define MAX_ROW_WALLS          2
 
 //Wall movement restrictions
 #define NORTH_WALL_BOUNDARY    0
@@ -59,6 +54,6 @@ void wall_create(void);
 void toggle_wall(Wall_t col_wall, bool display_on);
 
 // Shift wall in increment direction (contained within the wall)
-void move_col_walls(void);
+void move_wall(void);
 
 #endif
