@@ -8,9 +8,9 @@
 //Frequency of task execution in hz
 #define DISPLAY_UPDATE_RATE      275
 #define CHARACTER_UPDATE_RATE    20
-#define WALL_MOVEMENT_RATE       1                                        // ****Liable to change****
-#define WALL_CREATION_RATE       WALL_MOVEMENT_RATE *(DISPLAY_WIDTH + 1)  // wait for time of column movements + 1 to allow for time between walls
-#define PACER_RATE               500                                      // Total ticks in a second
+#define WALL_MOVEMENT_RATE       1                        // ****Liable to change****
+#define WALL_CREATION_RATE       WALL_MOVEMENT_RATE   	  // create_wall() now ckecks if previous is OUT_OF_BOUNDS
+#define PACER_RATE               500                      // Total ticks in a second
 
 int main(void)
 {
