@@ -7,7 +7,7 @@
 #ifndef WALL_H
 #define WALL_H
 
-#include "display.h"
+#include "system.h"
 
 /*  Create wall bitmap with a hole
  *  @param SIZE size of the whole in pixels //binary 0b00000001 to 0b00001111
@@ -47,6 +47,8 @@ typedef struct
    uint8_t   boundary_cond; // If pos>coundary_cond for wall deletion
 } Wall_t;                   // Wall object
 
+// Set seed for wall generation
+void wall_init(uint16_t seed);
 
 // Create a wall and spawn it in starting position
 void wall_create(void);

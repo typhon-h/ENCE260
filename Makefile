@@ -40,14 +40,19 @@ pacer.o: ../../utils/pacer.c ../../drivers/avr/system.h ../../drivers/avr/timer.
 timer.o: ../../drivers/avr/timer.c ../../drivers/avr/system.h ../../drivers/avr/timer.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+button.o: ../../drivers/button.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/button.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 wall.o: wall.c wall.h ../../drivers/display.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h
+
 # Link: create ELF output file from object files.
-game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o pacer.o timer.o
+game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o game_manager.o pacer.o timer.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

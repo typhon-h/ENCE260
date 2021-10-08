@@ -11,7 +11,12 @@
 // Active moving wall
 static Wall_t ACTIVE_WALL;
 
-static uint8_t RANDOM_SEED; // Just so we have randomness rn
+
+// Sets seed for wall generation
+void wall_init(uint16_t seed)
+{
+    srand(seed);
+}
 
 /* Creates adds a wall and replaces with oldest one */
 Wall_t decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t hole_shift_seed)
@@ -80,14 +85,12 @@ void wall_create(void)
     // For greater variation
 
     // Randomly select wall-type using default seed
-    srand(RANDOM_SEED);
     uint8_t direction_seed  = rand();
     uint8_t hole_size_seed  = rand();
     uint8_t hole_shift_seed = rand();
 
     // Generate wall type
     ACTIVE_WALL = decide_wall_type(direction_seed, hole_size_seed, hole_shift_seed);
-    RANDOM_SEED++;
 
     //Display wall
     toggle_wall(true);

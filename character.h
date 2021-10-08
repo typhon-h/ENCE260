@@ -6,7 +6,7 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include "display.h"
+#include "system.h"
 
 //Character movement restrictions
 #define WEST_CHARACTER_BOUNDARY     0 //Column
