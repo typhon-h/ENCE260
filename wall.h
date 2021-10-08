@@ -22,15 +22,15 @@
 #define WEST_WALL_BOUNDARY     0
 
 // Wall movement patterns
-#define UP_COL_WALL(X)      { (X), (0), (EAST), (EAST_WALL_BOUNDARY)}  //Move wall right
-#define DOWN_COL_WALL(X)    { (X), (4), (WEST), (EAST_WALL_BOUNDARY)}  //Move wall left
-#define UP_ROW_WALL(X)      { (X), (6), (NORTH), (SOUTH_WALL_BOUNDARY)} //Move wall up
-#define DOWN_ROW_WALL(X)    { (X), (0), (SOUTH), (SOUTH_WALL_BOUNDARY)} //Move wall down
+#define EAST_MOVING_WALL(X)     { (X), (0), (EAST), (EAST_WALL_BOUNDARY) }   //Move wall right
+#define WEST_MOVING_WALL(X)     { (X), (4), (WEST), (EAST_WALL_BOUNDARY) }   //Move wall left
+#define NORTH_MOVING_WALL(X)    { (X), (6), (NORTH), (SOUTH_WALL_BOUNDARY) } //Move wall up
+#define SOUTH_MOVING_WALL(X)    { (X), (0), (SOUTH), (SOUTH_WALL_BOUNDARY) } //Move wall down
 
 // Enum for increment direction of walls
 typedef enum
 {
-   EAST = 1,
+   EAST          = 1,
    SOUTH,
    WEST,
    NORTH,
@@ -41,11 +41,11 @@ typedef enum
 // Type definition for a wall
 typedef struct
 {
-   uint8_t   bit_data;    // 0b11000111 -- (1= Non-passible, 0=Passible)
-   uint8_t   pos;         // 0, 1, 2, 3, ...
-   direction dir;         // direction is enum, NORTH, EAST, SOUTH, WEST
-   uint8_t boundary_cond; // If pos>coundary_cond for wall deletion
-} Wall_t;                 // Wall object
+   uint8_t   bit_data;      // 0b11000111 -- (1= Non-passible, 0=Passible)
+   uint8_t   pos;           // 0, 1, 2, 3, ...
+   direction dir;           // direction is enum, NORTH, EAST, SOUTH, WEST
+   uint8_t   boundary_cond; // If pos>coundary_cond for wall deletion
+} Wall_t;                   // Wall object
 
 
 // Create a wall and spawn it in starting position
@@ -56,5 +56,8 @@ void toggle_wall(bool display_on);
 
 // Shift wall in increment direction (contained within the wall)
 void move_wall(void);
+
+//Update current wall position or create new wall
+void wall_update(void);
 
 #endif
