@@ -103,3 +103,4 @@ void character_update()
       move_west();
    }
 }
+
