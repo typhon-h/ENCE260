@@ -46,7 +46,7 @@ button.o: ../../drivers/button.c ../../drivers/avr/pio.h ../../drivers/avr/syste
 character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-wall.o: wall.c wall.h ../../drivers/display.h
+wall.o: wall.c wall.h ../../drivers/display.h character.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h
