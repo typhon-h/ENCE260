@@ -15,8 +15,7 @@ void game_start(uint16_t seed);
 // Poll button input to start game
 void game_state_update(uint16_t seed);
 
-
-
-
+// For game ending
+void game_outro(void);
 
 #endif
