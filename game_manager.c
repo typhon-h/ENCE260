@@ -4,8 +4,7 @@
 #include "wall.h"
 #include "button.h"
 
-static bool ACTIVE_GAME = false;
-
+bool ACTIVE_GAME = false;
 
 // Initialize game manager
 void game_init()
@@ -37,4 +36,11 @@ void game_state_update(uint16_t seed)
    {
       game_start(seed);
    }
+}
+
+void game_outro(void)
+{
+	// Right now 
+	// in future can display score / level
+	// maybe some epic music
 }
