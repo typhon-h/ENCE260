@@ -7,6 +7,7 @@
 #include "wall.h"
 #include "display.h"
 #include <stdlib.h>
+#include "character.h"
 
 // Active moving wall
 static Wall_t ACTIVE_WALL;
@@ -18,6 +19,24 @@ void wall_init(uint16_t seed)
     srand(seed);
 }
 
+/*  Checks whether wall has collided with player
+ *  @param display_on, if 0 display is removed
+ *  @brief: For a collsion to occur, player and ACTIVE_WALL must have 
+ 			same position AND player must not be inline with hole
+ */
+bool collision_dectection(position_t position)
+{
+	// Checks whether player is inline with piece of the wall
+	uint8_t player_bitmap = (ACTIVE_WALL.wall_type == ROW) ? BIT(position.x): BIT(position.y);
+	bool potential_collision = (ACTIVE_WALL.bit_data & player_bitmap) != 0;
+	
+	// Checks whether the player is on the ACTIVE_WALL position
+	uint8_t player_index = (ACTIVE_WALL.wall_type == ROW) ? position.y: position.x;
+	bool is_same_position = player_index == ACTIVE_WALL.pos;
+
+	return (potential_collision & is_same_position);
+}
+
 /* Creates adds a wall and replaces with oldest one */
 Wall_t decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t hole_shift_seed)
 {
@@ -25,7 +44,7 @@ Wall_t decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t 
    uint8_t wall_bitmap;
    uint8_t wall_direction = (direction_seed) % 4 + 1;
    uint8_t hole_size      = (hole_size_seed) % 3 + 1;
-   uint8_t wall_size      = (wall_direction < 2) ? 8: 6;
+   uint8_t wall_size      = (wall_direction <= 2) ? 6: 8;
    uint8_t hole_shift     = hole_shift_seed % (wall_size - hole_size);
 
    switch (hole_size)      //Convert hole size to binary for bitmap
@@ -109,10 +128,9 @@ void toggle_wall(bool display_on)
    uint8_t pattern  = (display_on) ? ACTIVE_WALL.bit_data : 0;
    uint8_t index;
 
-   switch (ACTIVE_WALL.dir)
+   switch (ACTIVE_WALL.wall_type)
    {
-   case NORTH:
-   case SOUTH:
+   case ROW:
       for (index = 0; index <= DISPLAY_WIDTH; index++)
       {
          bool state = (BIT(index) & pattern) != 0;
@@ -120,8 +138,7 @@ void toggle_wall(bool display_on)
       }
       break;
 
-   case EAST:
-   case WEST:
+   case COLUMN:
       for (index = 0; index <= DISPLAY_HEIGHT; index++)
       {
          bool state = (BIT(index) & pattern) != 0;
@@ -142,11 +159,11 @@ void move_wall()
 {
    toggle_wall(false);
    // if dir is EAST or SOUTH, pos++
-   ACTIVE_WALL.pos += (ACTIVE_WALL.dir <= 2) ? 1: -1;
+   ACTIVE_WALL.pos += (ACTIVE_WALL.direction % 2 == 0) ? 1: -1;
 
    if (ACTIVE_WALL.pos > ACTIVE_WALL.boundary_cond)
    {
-      ACTIVE_WALL.dir = OUT_OF_BOUNDS;
+      ACTIVE_WALL.wall_type = OUT_OF_BOUNDS;
       return;
    }
 
@@ -158,7 +175,7 @@ void move_wall()
 // Advances position or creates new wall
 void wall_update()
 {
-   if (ACTIVE_WALL.dir == OUT_OF_BOUNDS)
+   if (ACTIVE_WALL.wall_type == OUT_OF_BOUNDS)
    {
       wall_create();
    }
