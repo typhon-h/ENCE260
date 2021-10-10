@@ -7,33 +7,43 @@
 #include "display.h"
 #include "navswitch.h"
 
-// Global character position
-position_t character_pos = { .x = DEFAULT_X, .y = DEFAULT_Y };
+// Character position
+Position_t CHARACTER_POS;
 
 
 // Display character at default coordinates
 void character_init()
 {
-   display_pixel_set(character_pos.x, character_pos.y, true);
+   CHARACTER_POS = (Position_t){
+      .x = DEFAULT_X, .y = DEFAULT_Y
+   };
+   display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+}
+
+
+//Turn off character
+void character_disable()
+{
+   display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
 }
 
 
 /** Return current character coordinates
- *  @return position_t with .x .y values */
-position_t get_character_pos(void)
+ *  @return Position_t with .x .y values */
+Position_t get_character_pos(void)
 {
-   return character_pos;
+   return CHARACTER_POS;
 }
 
 
 /** Move character 1 unit west*/
 void move_west()
 {
-   if (WEST_CHARACTER_BOUNDARY < character_pos.x)
+   if (WEST_CHARACTER_BOUNDARY < CHARACTER_POS.x)
    {
-      display_pixel_set(character_pos.x, character_pos.y, false);
-      character_pos.x -= 1;
-      display_pixel_set(character_pos.x, character_pos.y, true);
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
+      CHARACTER_POS.x -= 1;
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
    }
 }
 
@@ -41,11 +51,11 @@ void move_west()
 /** Move character 1 unit east*/
 void move_east()
 {
-   if (EAST_CHARACTER_BOUNDARY > character_pos.x)
+   if (EAST_CHARACTER_BOUNDARY > CHARACTER_POS.x)
    {
-      display_pixel_set(character_pos.x, character_pos.y, false);
-      character_pos.x += 1;
-      display_pixel_set(character_pos.x, character_pos.y, true);
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
+      CHARACTER_POS.x += 1;
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
    }
 }
 
@@ -53,11 +63,11 @@ void move_east()
 /** Move character 1 unit north*/
 void move_north()
 {
-   if (NORTH_CHARACTER_BOUNDARY < character_pos.y)
+   if (NORTH_CHARACTER_BOUNDARY < CHARACTER_POS.y)
    {
-      display_pixel_set(character_pos.x, character_pos.y, false);
-      character_pos.y -= 1;
-      display_pixel_set(character_pos.x, character_pos.y, true);
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
+      CHARACTER_POS.y -= 1;
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
    }
 }
 
@@ -65,11 +75,11 @@ void move_north()
 /** Move character 1 unit south*/
 void move_south()
 {
-   if (SOUTH_CHARACTER_BOUNDARY > character_pos.y)
+   if (SOUTH_CHARACTER_BOUNDARY > CHARACTER_POS.y)
    {
-      display_pixel_set(character_pos.x, character_pos.y, false);
-      character_pos.y += 1;
-      display_pixel_set(character_pos.x, character_pos.y, true);
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
+      CHARACTER_POS.y += 1;
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
    }
 }
 
@@ -81,9 +91,9 @@ void character_update()
    navswitch_update();
 
    //Restore character state if passed by wall
-   if (!display_pixel_get(character_pos.x, character_pos.y))
+   if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
    {
-      display_pixel_set(character_pos.x, character_pos.y, true);
+      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
    }
    //Move character in direction of navswitch input
    if (navswitch_push_event_p(NAVSWITCH_NORTH))
@@ -103,4 +113,3 @@ void character_update()
       move_west();
    }
 }
-

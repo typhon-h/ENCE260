@@ -23,10 +23,10 @@
 #define WEST_WALL_BOUNDARY     0
 
 // Initialisation MACROs for each wall type
-#define EAST_MOVING_WALL(X)     {(X), (0), (EAST_WALL_BOUNDARY), (COLUMN), (EAST)}   //Move wall right
-#define WEST_MOVING_WALL(X)     {(X), (4), (EAST_WALL_BOUNDARY), (COLUMN), (WEST)}   //Move wall left
-#define NORTH_MOVING_WALL(X)    {(X), (6), (SOUTH_WALL_BOUNDARY), (ROW), (NORTH)} //Move wall up
-#define SOUTH_MOVING_WALL(X)    {(X), (0), (SOUTH_WALL_BOUNDARY), (ROW), (SOUTH)} //Move wall down
+#define EAST_MOVING_WALL(X)     { (X), (0), (EAST_WALL_BOUNDARY), (COLUMN), (EAST) } //Move wall right
+#define WEST_MOVING_WALL(X)     { (X), (4), (EAST_WALL_BOUNDARY), (COLUMN), (WEST) } //Move wall left
+#define NORTH_MOVING_WALL(X)    { (X), (6), (SOUTH_WALL_BOUNDARY), (ROW), (NORTH) }  //Move wall up
+#define SOUTH_MOVING_WALL(X)    { (X), (0), (SOUTH_WALL_BOUNDARY), (ROW), (SOUTH) }  //Move wall down
 
 
 // ENUM representing wall movement direction
@@ -39,7 +39,10 @@ typedef enum
 } WALL_DIRECTION;
 
 // Represents wll_type (i.e. if its displayed along a coplumn or row)
-typedef enum {COLUMN, ROW, OUT_OF_BOUNDS} WALL_TYPE;
+typedef enum
+{
+   COLUMN, ROW, OUT_OF_BOUNDS
+} WALL_TYPE;
 
 
 // Type definition for a wall
@@ -49,17 +52,17 @@ typedef struct
    uint8_t        pos;           // 0, 1, 2, 3, ...
    uint8_t        boundary_cond; // If pos>coundary_cond for wall deletion
    WALL_TYPE      wall_type;     // WALL_TYPE are COLUMN and ROW
-   WALL_DIRECTION direction;      // The direction of movement of wall
+   WALL_DIRECTION direction;     // The direction of movement of wall
 } Wall_t;                        // Wall object
 
 // Set seed for wall generation
 void wall_init(uint16_t seed);
 
+//Return active wall information as Wall_t type
+Wall_t get_active_wall(void);
+
 // Create a wall and spawn it in starting position
 void wall_create(void);
-
-// Returns collsion statusw when given a position
-bool collision_dectection(position_t position);
 
 // Toggle wall visibilty on display
 void toggle_wall(bool display_on);

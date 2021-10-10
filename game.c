@@ -1,3 +1,9 @@
+/** @file   game.c
+ *  @author Lucas Trickett, Harrison Tyson
+ *  @date   10 Oct 2021
+ *  @brief  Main task control
+ */
+
 #include "system.h"
 #include "pacer.h"
 #include "display.h"
@@ -12,64 +18,62 @@
 #define WALL_UPDATE_RATE       1                        // ****Liable to change****
 #define PACER_RATE             500                      // Total ticks in a second
 
-extern bool ACTIVE_GAME;
-extern position_t character_pos;
 
-
-void game_ending(void)
-{
-	game_outro();
-	display_clear();
-}
 int main(void)
 {
    // Module initialization
-	system_init();
-	display_init();
-	pacer_init(PACER_RATE);
-	game_init();
+   system_init();
+   display_init();
+   pacer_init(PACER_RATE);
+   game_init();
 
-	// Task delay times
-	uint16_t        input_time   = PACER_RATE / INPUT_UPDATE_RATE;
-	uint16_t        display_time = PACER_RATE / DISPLAY_UPDATE_RATE;
-	uint16_t        wall_time    = PACER_RATE / WALL_UPDATE_RATE; //Wall speed
-	static uint16_t ticks        = 0;
+   // Task delay times
+   uint16_t        input_time   = PACER_RATE / INPUT_UPDATE_RATE;
+   uint16_t        display_time = PACER_RATE / DISPLAY_UPDATE_RATE;
+   uint16_t        wall_time    = PACER_RATE / WALL_UPDATE_RATE;      //Wall speed
+   static uint16_t ticks        = 0;
 
-	while (1)
-	{
-		pacer_wait();
+   while (1)
+   {
+      pacer_wait();
 
-		if ((ticks % display_time) == 0) //Display refresh
-		{
-			display_update();
-		}
+      if ((ticks % display_time) == 0)           //Display refresh
+      {
+         display_update();
+      }
 
-		// Start game with pushbutton as it needs to be used
-		if (ACTIVE_GAME)            //Run game updates if game is active
-		{
-			if ((ticks % wall_time) == 0) //Move or create wall
-			{
-				wall_update();
-			}
+      // Start game with pushbutton as it needs to be used
+      if (get_game_state())                      //Run game updates if game is active
+      {
+         if ((ticks % wall_time) == 0)           //Move or create wall
+         {
+            wall_update();
+            if (collision_dectection())
+            {
+               game_end();
+               continue;
+            }
+         }
 
 
-			if (ticks % input_time == 0) //Character input polling
-			{
-				character_update();
-				if (collision_dectection(character_pos)) {
-					game_ending();
-					break;
-				}
-			}
-		}
-		else
-		{
-			if (ticks % input_time == 0) //Game start input polling
-			{
-				game_state_update(ticks); //Use current tick for wall seed
-			}
-		}
-		
-		  ticks++;
-	}
+         if (ticks % input_time == 0)                //Character input polling
+         {
+            character_update();
+            if (collision_dectection())
+            {
+               game_end();
+               continue;
+            }
+         }
+      }
+      else
+      {
+         if (ticks % input_time == 0)                //Game start input polling
+         {
+            game_state_update(ticks);                //Use current tick for wall seed
+         }
+      }
+
+      ticks++;
+   }
 }

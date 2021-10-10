@@ -10,24 +10,28 @@
 
 //Character movement restrictions
 #define WEST_CHARACTER_BOUNDARY     0 //Column
-#define EAST_CHARACTER_BOUNDARY    4 //Column
-#define NORTH_CHARACTER_BOUNDARY       0 //Row
-#define SOUTH_CHARACTER_BOUNDARY     6 //Row
+#define EAST_CHARACTER_BOUNDARY     4 //Column
+#define NORTH_CHARACTER_BOUNDARY    0 //Row
+#define SOUTH_CHARACTER_BOUNDARY    6 //Row
 
 //Default starting coordinates
-#define DEFAULT_X         2
-#define DEFAULT_Y         3
+#define DEFAULT_X                   2
+#define DEFAULT_Y                   3
 
 // Position coordinates structure
-typedef struct {
+typedef struct
+{
    uint8_t x, y;
-} position_t;
+} Position_t;
 
 //Create the character at the default starting position
 void character_init(void);
 
-//Give game.c ability to access character position
-position_t get_character_pos(void);
+//Turn off character
+void character_disable(void);
+
+//Return current position of the character
+Position_t get_character_pos(void);
 
 //Move the character in the given direction, restricted by boundary
 void move_west(void);

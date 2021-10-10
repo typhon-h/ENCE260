@@ -16,26 +16,19 @@ static Wall_t ACTIVE_WALL;
 // Sets seed for wall generation
 void wall_init(uint16_t seed)
 {
-    srand(seed);
+   srand(seed);
+   //Reset wall if active wall exists
+   ACTIVE_WALL.wall_type = OUT_OF_BOUNDS;
+   ACTIVE_WALL.bit_data  = 0;
 }
 
-/*  Checks whether wall has collided with player
- *  @param display_on, if 0 display is removed
- *  @brief: For a collsion to occur, player and ACTIVE_WALL must have 
- 			same position AND player must not be inline with hole
- */
-bool collision_dectection(position_t position)
+
+//Returns the current active wall as Wall_t
+Wall_t get_active_wall()
 {
-	// Checks whether player is inline with piece of the wall
-	uint8_t player_bitmap = (ACTIVE_WALL.wall_type == ROW) ? BIT(position.x): BIT(position.y);
-	bool potential_collision = (ACTIVE_WALL.bit_data & player_bitmap) != 0;
-	
-	// Checks whether the player is on the ACTIVE_WALL position
-	uint8_t player_index = (ACTIVE_WALL.wall_type == ROW) ? position.y: position.x;
-	bool is_same_position = player_index == ACTIVE_WALL.pos;
-
-	return (potential_collision & is_same_position);
+   return ACTIVE_WALL;
 }
+
 
 /* Creates adds a wall and replaces with oldest one */
 Wall_t decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t hole_shift_seed)
@@ -100,20 +93,19 @@ Wall_t decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t 
 // Won't matter atm, but could be useful when varying difficulty
 void wall_create(void)
 {
-    // Possible seed using srand based off the tick when game activated via button/menu
-    // For greater variation
+   // Possible seed using srand based off the tick when game activated via button/menu
+   // For greater variation
 
-    // Randomly select wall-type using default seed
-    uint8_t direction_seed  = rand();
-    uint8_t hole_size_seed  = rand();
-    uint8_t hole_shift_seed = rand();
+   // Randomly select wall-type using default seed
+   uint8_t direction_seed  = rand();
+   uint8_t hole_size_seed  = rand();
+   uint8_t hole_shift_seed = rand();
 
-    // Generate wall type
-    ACTIVE_WALL = decide_wall_type(direction_seed, hole_size_seed, hole_shift_seed);
+   // Generate wall type
+   ACTIVE_WALL = decide_wall_type(direction_seed, hole_size_seed, hole_shift_seed);
 
-    //Display wall
-    toggle_wall(true);
-
+   //Display wall
+   toggle_wall(true);
 }
 
 
