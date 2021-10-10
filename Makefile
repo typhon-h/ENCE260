@@ -16,7 +16,7 @@ all: game.out
 
 
 # Compile: create object files from C source files.
-game.o: game.c ../../drivers/avr/system.h ../../drivers/display.h character.h wall.h
+game.o: game.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/tinygl.h character.h wall.h game_manager.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 system.o: ../../drivers/avr/system.c ../../drivers/avr/system.h
@@ -43,16 +43,22 @@ timer.o: ../../drivers/avr/timer.c ../../drivers/avr/system.h ../../drivers/avr/
 button.o: ../../drivers/button.c ../../drivers/avr/pio.h ../../drivers/avr/system.h ../../drivers/button.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.h ../../utils/font.h ../../utils/tinygl.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 wall.o: wall.c wall.h ../../drivers/display.h character.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h
+game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font5x7_1.h
 
 # Link: create ELF output file from object files.
-game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o game_manager.o pacer.o timer.o
+game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o tinygl.o font.o game_manager.o pacer.o timer.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

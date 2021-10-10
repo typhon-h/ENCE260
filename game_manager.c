@@ -13,12 +13,19 @@
 #include "wall.h"
 #include "button.h"
 
+#include "tinygl.h"
+#include "../fonts/font5x7_1.h"
+
+
 bool ACTIVE_GAME = false;
 
 // Initialize game manager
 void game_init()
 {
    button_init();
+   tinygl_font_set(&font5x7_1);
+   tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
+   tinygl_text("press to start ");
 }
 
 
@@ -32,6 +39,7 @@ bool get_game_state()
 // Initialize game components and toggle game state
 void game_start(uint16_t seed)
 {
+   tinygl_clear();
    character_init();
    wall_init(seed);
 
@@ -63,6 +71,7 @@ void game_end(void)
 
 void game_outro(void)
 {
+   tinygl_text("game over ");
    // Right now
    // in future can display score / level
    // maybe some epic music

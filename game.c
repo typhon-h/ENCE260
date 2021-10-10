@@ -11,19 +11,22 @@
 #include "wall.h"
 #include "game_manager.h"
 
+#include "tinygl.h"
+
 
 //Frequency of task execution in hz
-#define DISPLAY_UPDATE_RATE     275
-#define INPUT_UPDATE_RATE       20
-#define PACER_RATE              500 // Total ticks in a second
+#define DISPLAY_UPDATE_RATE          275
+#define INPUT_UPDATE_RATE            20
+#define PACER_RATE                   500 // Total ticks in a second
+#define MESSAGE_RATE                 20  // Tinygl text scroll speed
 
 //Difficulty constants
-#define WALL_SPEED_INCREMENT_RATE    15               // Delay before speed increment in seconds
-#define WALL_SPEED_INCREMENT    1                // Amount wall speed increases by (walls/second)
-#define DEFAULT_SPEED          1                // Default starting wall speed
+#define WALL_SPEED_INCREMENT_RATE    15         // Delay before speed increment in seconds
+#define WALL_SPEED_INCREMENT         1          // Amount wall speed increases by (walls/second)
+#define DEFAULT_SPEED                1          // Default starting wall speed
 
 static uint8_t WALL_SPEED      = DEFAULT_SPEED; // Default wall speed (walls/second)
-uint16_t       game_start_time = 0;              // Used so speed increase counts time from game start
+uint16_t       game_start_time = 0;             // Used so speed increase counts time from game start
 
 
 
@@ -33,7 +36,13 @@ int main(void)
    system_init();
    display_init();
    pacer_init(PACER_RATE);
+
+   tinygl_init(PACER_RATE);
+   tinygl_text_speed_set(MESSAGE_RATE);
+
    game_init();
+
+
 
    // Task delay times
    uint16_t input_time           = PACER_RATE / INPUT_UPDATE_RATE;
@@ -94,9 +103,11 @@ int main(void)
       }
       else
       {
-         if (ticks % input_time == 0)                //Game start input polling
+         tinygl_update();             //Update scrolling text
+
+         if (ticks % input_time == 0) //Game start input polling
          {
-            game_state_update(ticks);                //Use current tick for wall seed
+            game_state_update(ticks); //Use current tick for wall seed
          }
       }
 
