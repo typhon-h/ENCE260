@@ -18,7 +18,7 @@
 #define DISPLAY_UPDATE_RATE          275
 #define INPUT_UPDATE_RATE            20
 #define PACER_RATE                   500 // Total ticks in a second
-#define MESSAGE_RATE                 20  // Tinygl text scroll speed
+#define MESSAGE_RATE                 25  // Tinygl text scroll speed
 
 //Difficulty constants
 #define WALL_SPEED_INCREMENT_RATE    15         // Delay before speed increment in seconds

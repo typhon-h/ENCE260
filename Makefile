@@ -55,7 +55,7 @@ character.o: character.c character.h ../../drivers/display.h ../../drivers/navsw
 wall.o: wall.c wall.h ../../drivers/display.h character.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font5x7_1.h
+game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font3x5_1.h
 
 # Link: create ELF output file from object files.
 game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o tinygl.o font.o game_manager.o pacer.o timer.o

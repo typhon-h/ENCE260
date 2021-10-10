@@ -14,7 +14,7 @@
 #include "button.h"
 
 #include "tinygl.h"
-#include "../fonts/font5x7_1.h"
+#include "../fonts/font3x5_1.h"
 
 
 bool ACTIVE_GAME = false;
@@ -23,9 +23,10 @@ bool ACTIVE_GAME = false;
 void game_init()
 {
    button_init();
-   tinygl_font_set(&font5x7_1);
+   tinygl_font_set(&font3x5_1);
    tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
-   tinygl_text("press to start ");
+   tinygl_text_dir_set(TINYGL_TEXT_DIR_ROTATE);
+   tinygl_text(" PRESS TO START ");
 }
 
 
@@ -71,7 +72,7 @@ void game_end(void)
 
 void game_outro(void)
 {
-   tinygl_text("game over ");
+   tinygl_text(" GAME OVER ");
    // Right now
    // in future can display score / level
    // maybe some epic music
