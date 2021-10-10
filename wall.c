@@ -119,6 +119,7 @@ void toggle_wall(bool display_on)
    uint8_t position = ACTIVE_WALL.pos;
    uint8_t pattern  = (display_on) ? ACTIVE_WALL.bit_data : 0;
    uint8_t index;
+   Position_t character = get_character_pos();
 
    switch (ACTIVE_WALL.wall_type)
    {
@@ -126,7 +127,10 @@ void toggle_wall(bool display_on)
       for (index = 0; index <= DISPLAY_WIDTH; index++)
       {
          bool state = (BIT(index) & pattern) != 0;
-         display_pixel_set(index, position, state);
+         if (index != character.x || position != character.y)
+         {
+            display_pixel_set(index, position, state);
+         }
       }
       break;
 
@@ -134,7 +138,10 @@ void toggle_wall(bool display_on)
       for (index = 0; index <= DISPLAY_HEIGHT; index++)
       {
          bool state = (BIT(index) & pattern) != 0;
-         display_pixel_set(position, index, state);
+         if (position != character.x || index != character.y)
+         {
+            display_pixel_set(position, index, state);
+         }
       }
       break;
 
