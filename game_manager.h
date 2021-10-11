@@ -22,11 +22,12 @@ void increment_score(void);
 bool get_game_state(void);
 
 // Initialize game components and toggle game state
-void game_start(uint16_t seed);
+void game_start(void);
 
 // Poll button input to start game
-void game_state_update(uint16_t seed);
+void game_state_update(void);
 
+// Check game ending conditions and end the game
 void check_game_end(void);
 
 //Stop the current game and open game outro

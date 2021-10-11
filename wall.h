@@ -56,7 +56,7 @@ typedef struct
 } Wall_t;                        // Wall object
 
 // Set seed for wall generation
-void wall_init(uint16_t seed);
+void wall_init(void);
 
 //Return active wall information as Wall_t type
 Wall_t get_active_wall(void);

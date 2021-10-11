@@ -52,11 +52,11 @@ void increment_score()
 
 
 // Initialize game components and toggle game state
-void game_start(uint16_t seed)
+void game_start()
 {
    tinygl_clear();
    character_init();
-   wall_init(seed);
+   wall_init();
    SCORE = 0;
 
    ACTIVE_GAME = true;
@@ -64,13 +64,13 @@ void game_start(uint16_t seed)
 
 
 // Poll button input to start game
-void game_state_update(uint16_t seed)
+void game_state_update()
 {
    button_update();
 
    if (button_push_event_p(0))
    {
-      game_start(seed);
+      game_start();
    }
 }
 

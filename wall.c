@@ -15,9 +15,9 @@ static Wall_t ACTIVE_WALL;
 
 
 // Sets seed for wall generation
-void wall_init(uint16_t seed)
+void wall_init()
 {
-   srand(seed);
+   srand(rand());
    //Reset wall if active wall exists
    ACTIVE_WALL.wall_type = OUT_OF_BOUNDS;
    ACTIVE_WALL.bit_data  = 0;

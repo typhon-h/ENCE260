@@ -83,7 +83,7 @@ static void start_game_task(void *data)
       //Reset difficulty
       WALL_SPEED   = DEFAULT_SPEED;
       task->period = TASK_RATE / WALL_SPEED;
-      game_state_update(0);
+      game_state_update();
    }
 }
 
