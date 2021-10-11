@@ -8,6 +8,7 @@
 #include "display.h"
 #include <stdlib.h>
 #include "character.h"
+#include "game_manager.h"
 
 // Active moving wall
 static Wall_t ACTIVE_WALL;
@@ -177,6 +178,7 @@ void wall_update()
    if (ACTIVE_WALL.wall_type == OUT_OF_BOUNDS)
    {
       wall_create();
+      increment_score();
    }
    else
    {

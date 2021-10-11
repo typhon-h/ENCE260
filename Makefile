@@ -52,13 +52,17 @@ font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
 character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-wall.o: wall.c wall.h ../../drivers/display.h character.h
+wall.o: wall.c wall.h ../../drivers/display.h character.h game_manager.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font3x5_1.h
+uint8toa.o: ../../utils/uint8toa.c ../../drivers/avr/system.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font3x5_1.h ../../utils/uint8toa.h
+	$(CC) -c $(CFLAGS) $< -o $@
 
 # Link: create ELF output file from object files.
-game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o tinygl.o font.o game_manager.o pacer.o timer.o
+game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o tinygl.o font.o uint8toa.o game_manager.o pacer.o timer.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 

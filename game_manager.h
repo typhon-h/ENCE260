@@ -13,7 +13,10 @@
 #include "system.h"
 
 // Initialize game manager
-void game_init(void);
+void game_init(uint8_t message_rate);
+
+// Increment the score
+void increment_score(void);
 
 // Return current state of game (is it being played)
 bool get_game_state(void);

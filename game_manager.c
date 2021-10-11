@@ -15,18 +15,25 @@
 
 #include "tinygl.h"
 #include "../fonts/font3x5_1.h"
+#include "uint8toa.h"
 
+#define START_PROMPT      " PRESS TO START "
+#define END_PROMPT        " GAME OVER SCORE:" //Additional whitespace to insert score
+#define END_PROMPT_LEN    17
+#define SIZE_OF_UINT8     8                   //For buffer on end message for score
 
-bool ACTIVE_GAME = false;
+bool    ACTIVE_GAME = false;
+uint8_t SCORE       = 0;
 
 // Initialize game manager
-void game_init()
+void game_init(uint8_t message_rate)
 {
    button_init();
+   tinygl_text_speed_set(message_rate);
    tinygl_font_set(&font3x5_1);
    tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
    tinygl_text_dir_set(TINYGL_TEXT_DIR_ROTATE);
-   tinygl_text(" PRESS TO START ");
+   tinygl_text(START_PROMPT);
 }
 
 
@@ -37,12 +44,20 @@ bool get_game_state()
 }
 
 
+//Increment score
+void increment_score()
+{
+   SCORE++;
+}
+
+
 // Initialize game components and toggle game state
 void game_start(uint16_t seed)
 {
    tinygl_clear();
    character_init();
    wall_init(seed);
+   SCORE = 0;
 
    ACTIVE_GAME = true;
 }
@@ -72,7 +87,9 @@ void game_end(void)
 
 void game_outro(void)
 {
-   tinygl_text(" GAME OVER ");
+   char end_message[END_PROMPT_LEN + SIZE_OF_UINT8] = END_PROMPT;
+   uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
+   tinygl_text(end_message);
    // Right now
    // in future can display score / level
    // maybe some epic music
