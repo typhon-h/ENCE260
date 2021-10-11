@@ -70,7 +70,4 @@ void toggle_wall(bool display_on);
 // Shift wall in increment direction (contained within the wall)
 void move_wall(void);
 
-//Update current wall position or create new wall
-void wall_update(void);
-
 #endif

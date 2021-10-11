@@ -27,10 +27,12 @@ void game_start(uint16_t seed);
 // Poll button input to start game
 void game_state_update(uint16_t seed);
 
+void check_game_end(void);
+
 //Stop the current game and open game outro
 void game_end(void);
 
-// For game ending
+// Post game menu - Game over screen and score
 void game_outro(void);
 
 // Returns collsion status when given a position

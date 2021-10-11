@@ -75,6 +75,18 @@ void game_state_update(uint16_t seed)
 }
 
 
+void check_game_end(void)
+{
+   if (get_game_state())
+   {
+      if (collision_dectection())                           // Reset game variables
+      {
+         game_end();
+      }
+   }
+}
+
+
 //Disable game elements and toggle game state
 void game_end(void)
 {
@@ -88,6 +100,7 @@ void game_end(void)
 void game_outro(void)
 {
    char end_message[END_PROMPT_LEN + SIZE_OF_UINT8] = END_PROMPT;
+
    uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
    tinygl_text(end_message);
    // Right now

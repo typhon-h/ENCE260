@@ -5,28 +5,104 @@
  */
 
 #include "system.h"
-#include "pacer.h"
+#include "task.h"
 #include "display.h"
 #include "character.h"
 #include "wall.h"
 #include "game_manager.h"
 #include "tinygl.h"
 
+//Surpress warnings for unused function parameters
+#define UNUSED(PARAM)    (void)(PARAM)
 
 //Frequency of task execution in hz
-#define DISPLAY_UPDATE_RATE            275
+#define DISPLAY_UPDATE_RATE            300
 #define INPUT_UPDATE_RATE              20
-#define MESSAGE_RATE                   25  // Tinygl text scroll speed
-#define PACER_RATE                     500 // Total ticks in a second
+#define MESSAGE_RATE                   20  // Tinygl text scroll speed
 
 //Difficulty constants
-#define WALL_SPEED_INCREMENT_RATE      15        // Delay before speed increment in seconds
-#define WALL_SPEED_INCREMENT_AMOUNT    1         // Amount wall speed increases by (walls/second)
-#define DEFAULT_SPEED                  1         // Default starting wall speed
+#define WALL_SPEED_INCREMENT_RATE      20  // Delay before speed increment in seconds
+#define WALL_SPEED_INCREMENT_AMOUNT    1   // Amount wall speed increases by (walls/second)
+#define DEFAULT_SPEED                  1   // Default starting wall speed
 
-static uint8_t  WALL_SPEED      = DEFAULT_SPEED; // Default wall speed (walls/second)
-static uint16_t game_start_time = 0;             // Used so speed increase counts time from game start
+#define WALL_TASK_INDEX                2   //Index of the wall task object within tasks array
 
+static uint8_t WALL_SPEED = DEFAULT_SPEED; // Default wall speed (walls/second)
+
+// Update display
+static void display_task(void *data)
+{
+   UNUSED(data);
+   tinygl_update();  //Update scrolling text
+   display_update();
+}
+
+
+// Update walls - move existing wall or create new wall and increment score
+static void wall_task(void *data)
+{
+   UNUSED(data);
+
+   if (get_game_state())
+   {
+      if (get_active_wall().wall_type == OUT_OF_BOUNDS)
+      {
+         wall_create();
+         increment_score();
+      }
+      else
+      {
+         move_wall();
+      }
+
+      check_game_end();
+   }
+}
+
+
+// Poll input and update character position
+static void character_task(void *data)
+{
+   UNUSED(data);
+
+   if (get_game_state())
+   {
+      character_update();
+      check_game_end();
+   }
+}
+
+
+// Poll input to start the game
+static void start_game_task(void *data)
+{
+   task_t *task = data;
+
+   if (!get_game_state())
+   {
+      //Reset difficulty
+      WALL_SPEED   = DEFAULT_SPEED;
+      task->period = TASK_RATE / WALL_SPEED;
+      game_state_update(0);
+   }
+}
+
+
+// Increase game difficulty by incrementing wall speed
+static void difficulty_task(void *data)
+{
+   static uint8_t counter = 0;
+   task_t         *task   = data;
+
+   task->period = TASK_RATE / WALL_SPEED;
+   counter++;
+   if (counter >= WALL_SPEED_INCREMENT_RATE)
+   {
+      WALL_SPEED  += WALL_SPEED_INCREMENT_AMOUNT;
+      task->period = TASK_RATE / WALL_SPEED;
+      counter      = 0;
+   }
+}
 
 
 int main(void)
@@ -34,70 +110,19 @@ int main(void)
    // Module initialization
    system_init();
    display_init();
-   pacer_init(PACER_RATE);
-   tinygl_init(PACER_RATE);
+   tinygl_init(DISPLAY_UPDATE_RATE);
    game_init(MESSAGE_RATE);
 
-   // Task delay times
-   uint16_t input_time           = PACER_RATE / INPUT_UPDATE_RATE;
-   uint16_t display_time         = PACER_RATE / DISPLAY_UPDATE_RATE;
-   uint16_t wall_time            = PACER_RATE / WALL_SPEED; // Wall speed
-   uint16_t speed_increment_time = PACER_RATE * WALL_SPEED_INCREMENT_RATE;
-
-   static uint16_t ticks = 0;
-
-   while (1)
+   // Task definitions
+   task_t tasks[5] =
    {
-      pacer_wait();
+      { .func = display_task,    .period = TASK_RATE / DISPLAY_UPDATE_RATE },
+      { .func = character_task,  .period = TASK_RATE / INPUT_UPDATE_RATE   },
+      { .func = wall_task,       .period = TASK_RATE / WALL_SPEED          },
+      { .func = difficulty_task, .period = TASK_RATE, .data = &(tasks[WALL_TASK_INDEX])},
+      { .func = start_game_task, .period = TASK_RATE / INPUT_UPDATE_RATE, .data = &(tasks[WALL_TASK_INDEX])},
+   };
 
-      if ((ticks % display_time) == 0) //Display refresh
-      {
-         tinygl_update();              //Update scrolling text
-         display_update();
-      }
-
-      // Start game with pushbutton as it needs to be used
-      if (get_game_state())   //Run game updates if game is active
-      {
-         //Ticks-1 so that wall speed isn't increased immediately on game start
-         game_start_time = (game_start_time == 0)? ticks - 1: game_start_time;
-
-         if (((ticks - game_start_time) % speed_increment_time) == 0)
-         {
-            WALL_SPEED += WALL_SPEED_INCREMENT_AMOUNT;
-            wall_time   = PACER_RATE / WALL_SPEED;
-         }
-
-         if ((ticks % wall_time) == 0)    //Move or create wall
-         {
-            wall_update();
-         }
-
-         if (ticks % input_time == 0) //Character input polling
-         {
-            character_update();
-         }
-
-         if ((ticks % wall_time == 0) || (ticks % input_time == 0)) //Check for game end
-         {
-            if (collision_dectection())                             // Reset game variables
-            {
-               WALL_SPEED      = DEFAULT_SPEED;
-               wall_time       = PACER_RATE / WALL_SPEED;
-               game_start_time = 0;
-               game_end();
-               continue;
-            }
-         }
-      }
-      else
-      {
-         if (ticks % input_time == 0) //Game start input polling
-         {
-            game_state_update(ticks); //Use current tick for wall seed
-         }
-      }
-
-      ticks++;
-   }
+   // Run tasks
+   task_schedule(tasks, 5);
 }

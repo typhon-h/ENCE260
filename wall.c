@@ -117,9 +117,9 @@ void toggle_wall(bool display_on)
 {
    // Only one active wall so only need bool input
 
-   uint8_t position = ACTIVE_WALL.pos;
-   uint8_t pattern  = (display_on) ? ACTIVE_WALL.bit_data : 0;
-   uint8_t index;
+   uint8_t    position = ACTIVE_WALL.pos;
+   uint8_t    pattern  = (display_on) ? ACTIVE_WALL.bit_data : 0;
+   uint8_t    index;
    Position_t character = get_character_pos();
 
    switch (ACTIVE_WALL.wall_type)
@@ -128,7 +128,7 @@ void toggle_wall(bool display_on)
       for (index = 0; index <= DISPLAY_WIDTH; index++)
       {
          bool state = (BIT(index) & pattern) != 0;
-         if (index != character.x || position != character.y)
+         if ((index != character.x) || (position != character.y))
          {
             display_pixel_set(index, position, state);
          }
@@ -139,7 +139,7 @@ void toggle_wall(bool display_on)
       for (index = 0; index <= DISPLAY_HEIGHT; index++)
       {
          bool state = (BIT(index) & pattern) != 0;
-         if (position != character.x || index != character.y)
+         if ((position != character.x) || (index != character.y))
          {
             display_pixel_set(position, index, state);
          }
@@ -168,20 +168,4 @@ void move_wall()
    }
 
    toggle_wall(true);    // Won't change anything if ACTIVE_WALL is NULL
-}
-
-
-// Updates current wall state
-// Advances position or creates new wall
-void wall_update()
-{
-   if (ACTIVE_WALL.wall_type == OUT_OF_BOUNDS)
-   {
-      wall_create();
-      increment_score();
-   }
-   else
-   {
-      move_wall();
-   }
 }
