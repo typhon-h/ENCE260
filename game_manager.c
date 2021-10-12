@@ -18,23 +18,21 @@
 #include "../fonts/font3x5_1.h"
 #include "uint8toa.h"
 
-#define GAME_MODE_PROMPT       " SELECT GAME MODE "
-#define START_GAME_PROMPT      " PRESS TO START "
-#define END_PROMPT        " GAME OVER SCORE:" //Additional whitespace to insert score
-#define END_PROMPT_LEN    17
-#define SIZE_OF_UINT8     8                   //For buffer on end message for score
+#define GAME_MODE_PROMPT    " SELECT GAME MODE "
+#define END_PROMPT          " GAME OVER SCORE:"  //Additional whitespace to insert score
+#define END_PROMPT_LEN      17
+#define SIZE_OF_UINT8       8                    //For buffer on end message for score
 
 
-bool    ACTIVE_GAME       = false;
-bool    GAMEMODE_SELECTED = false;
-uint8_t SCORE             = 0;       // has a max of 255
-uint8_t GAME_MODE_index   = 0; 
+bool    ACTIVE_GAME     = false;
+uint8_t SCORE           = 0;         // has a max of 255
+uint8_t GAME_MODE_index = 0;
 
-char* GAMEMODE_STRINGS[] = 
+char *GAMEMODE_STRINGS[] =
 {
-	HARD_MODE_TEXT,
-	THREE_LIVES_TEXT,
-	WALL_PUSH_TEXT
+   HARD_MODE_TEXT,
+   THREE_LIVES_TEXT,
+   WALL_PUSH_TEXT
 };
 
 // Initialize game manager, starts game menu
@@ -67,24 +65,25 @@ void increment_score()
 void game_start()
 {
    uint8_t player_lives;
-   switch((gamemode_t) GAME_MODE_index)
+
+   switch ((gamemode_t)GAME_MODE_index)
    {
    case THREE_LIVES:
-   		player_lives = 3;
-   		break;
-   		
+      player_lives = 3;
+      break;
+
    case HARD_MODE:
-   		player_lives = 1;
-   		break;
-   		
+      player_lives = 1;
+      break;
+
    case WALL_PUSH:
-   		player_lives = 1; //Death intant for OUT_OF_BOUNDS
-   		break;
-   		
+      player_lives = 1;           //Death intant for OUT_OF_BOUNDS
+      break;
+
    default:
-        player_lives = 3; //Defaults to Three-lives 
+      player_lives = 3;   //Defaults to Three-lives
    }
-   
+
    tinygl_clear();
    character_init(player_lives);
    wall_init();
@@ -97,85 +96,100 @@ void game_start()
 // Poll button input to start game
 void game_state_update()
 {
-	navswitch_update();
-	
-	// If navswitch is pressed, game option menu scrolls down
-	if (navswitch_push_event_p(NAVSWITCH_PUSH) & !GAMEMODE_SELECTED)
-	{
-		tinygl_clear();
-		GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;
-		tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);
-	}
+   static bool gamemode_selected = false;
+   static bool game_end          = false;
 
-	button_update();
+   navswitch_update();
 
-	if (button_push_event_p(0) & !GAMEMODE_SELECTED)
-	{
-		// If button is pushed, gamemode (that's displayed) is selected
-		GAMEMODE_SELECTED = true;
-		tinygl_clear();
-		tinygl_text(START_GAME_PROMPT);
-	}
-	else if (button_push_event_p(0)) 
-	{
-		// "Game starts when gamemode is selected and button pushed"	
-		game_start();
-	}
+   // If navswitch is pressed, game option menu scrolls down
+   if (navswitch_push_event_p(NAVSWITCH_PUSH) && !game_end)
+   {
+      tinygl_clear();
+      GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;
+      tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);
+      gamemode_selected = true;
+   }
+
+   button_update();
+
+   if (button_push_event_p(0))
+   {
+      if (game_end) //Show mode menu if pressed at end of game
+      {
+         tinygl_clear();
+         tinygl_text(GAME_MODE_PROMPT);
+         game_end = false;
+      }
+      else if (gamemode_selected)
+      {
+         // "Game starts when gamemode is selected and button pushed"
+         gamemode_selected = false; //Game mode menu reappears on restart
+         game_end          = true;  //Next menu will be end of game
+         game_start();
+      }
+   }
 }
+
 
 // if lives = 0, Disable game elements and toggle game state
 void decrease_lives(void)
 {
-   if (decrease_player_lives()) 
+   if (decrease_player_lives())
    {
-	   ACTIVE_GAME = false;
-	   toggle_wall(false);
-	   character_disable();
-	   game_outro();
+      ACTIVE_GAME = false;
+      toggle_wall(false);
+      character_disable();
+      game_outro();
    }
 }
+
 
 /* Each gammode has different outcomes during collsions*/
 void gamemode_collsion_process(void)
 {
    bool player_at_border;
-   switch((gamemode_t) GAME_MODE_index)
+
+   switch ((gamemode_t)GAME_MODE_index)
    {
    case HARD_MODE:
    case THREE_LIVES:
-   		// Will simply reduce the number of lives by 1
-   		// stun is introduced to prevent multiple loss of lives from a single collision
-	    decrease_lives();
- 		toggle_stun(true); // Automatically is unstun when wall moves again
- 		break;
-   		
+      // Will simply reduce the number of lives by 1
+      // stun is introduced to prevent multiple loss of lives from a single collision
+      decrease_lives();
+      toggle_stun(true);           // Automatically is unstun when wall moves again
+      break;
+
    case WALL_PUSH:
 
-   		// Will move character in direction of wall movement)
-		if (get_active_wall().wall_type == ROW) {
-			player_at_border = (get_active_wall().direction == NORTH) ? move_north(): move_south();
-		} else {
-			player_at_border = (get_active_wall().direction == EAST) ? move_east(): move_west();
-		}
-		toggle_wall(1); // Re-display the part of wall which collided with player
-			            // (which disappears after player is moved)
-		if (player_at_border)
-		{
-		    decrease_lives();
-		}
-   		break;
-	}
+      // Will move character in direction of wall movement)
+      if (get_active_wall().wall_type == ROW)
+      {
+         player_at_border = (get_active_wall().direction == NORTH) ? move_north(): move_south();
+      }
+      else
+      {
+         player_at_border = (get_active_wall().direction == EAST) ? move_east(): move_west();
+      }
+      toggle_wall(1);           // Re-display the part of wall which collided with player
+      // (which disappears after player is moved)
+      if (player_at_border)
+      {
+         decrease_lives();
+      }
+      break;
+   }
 }
+
 
 void check_collisions()
 {
    if (get_game_state())
-	{
-		if (collision_dectection() & !get_stun_condition())      
-		{
-			gamemode_collsion_process();
-		}
-	}
+   {
+      if (collision_dectection() & !get_stun_condition())
+      {
+         gamemode_collsion_process();
+      }
+   }
 }
 
 
