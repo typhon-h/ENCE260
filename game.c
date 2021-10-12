@@ -53,9 +53,12 @@ static void wall_task(void *data)
       else
       {
          move_wall();
+         
+         // Allows player to move after a potential collision
+         toggle_stun(0);
       }
 
-      check_game_end();
+      check_collisions();
    }
 }
 
@@ -68,7 +71,7 @@ static void character_task(void *data)
    if (get_game_state())
    {
       character_update();
-      check_game_end();
+      check_collisions();
    }
 }
 
