@@ -12,20 +12,32 @@
 #include "character.h"
 #include "wall.h"
 #include "button.h"
+#include "navswitch.h"
 
 #include "tinygl.h"
 #include "../fonts/font3x5_1.h"
 #include "uint8toa.h"
 
-#define START_PROMPT      " PRESS TO START "
+#define GAME_MODE_PROMPT       " SELECT GAME MODE "
+#define START_GAME_PROMPT      " PRESS TO START "
 #define END_PROMPT        " GAME OVER SCORE:" //Additional whitespace to insert score
 #define END_PROMPT_LEN    17
 #define SIZE_OF_UINT8     8                   //For buffer on end message for score
 
-bool    ACTIVE_GAME = false;
-uint8_t SCORE       = 0;
 
-// Initialize game manager
+bool    ACTIVE_GAME       = false;
+bool    GAMEMODE_SELECTED = false;
+uint8_t SCORE             = 0;       // has a max of 255
+uint8_t GAME_MODE_index   = 0; 
+
+char* GAMEMODE_STRINGS[] = 
+{
+	HARD_MODE_TEXT,
+	THREE_LIVES_TEXT,
+	WALL_PUSH_TEXT
+};
+
+// Initialize game manager, starts game menu
 void game_init(uint8_t message_rate)
 {
    button_init();
@@ -33,7 +45,7 @@ void game_init(uint8_t message_rate)
    tinygl_font_set(&font3x5_1);
    tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
    tinygl_text_dir_set(TINYGL_TEXT_DIR_ROTATE);
-   tinygl_text(START_PROMPT);
+   tinygl_text(GAME_MODE_PROMPT);
 }
 
 
@@ -54,8 +66,27 @@ void increment_score()
 // Initialize game components and toggle game state
 void game_start()
 {
+   uint8_t player_lives;
+   switch((gamemode_t) GAME_MODE_index)
+   {
+   case THREE_LIVES:
+   		player_lives = 3;
+   		break;
+   		
+   case HARD_MODE:
+   		player_lives = 1;
+   		break;
+   		
+   case WALL_PUSH:
+   		player_lives = 1; //Death intant for OUT_OF_BOUNDS
+   		break;
+   		
+   default:
+        player_lives = 3; //Defaults to Three-lives 
+   }
+   
    tinygl_clear();
-   character_init();
+   character_init(player_lives);
    wall_init();
    SCORE = 0;
 
@@ -66,34 +97,85 @@ void game_start()
 // Poll button input to start game
 void game_state_update()
 {
-   button_update();
+	navswitch_update();
+	
+	// If navswitch is pressed, game option menu scrolls down
+	if (navswitch_push_event_p(NAVSWITCH_PUSH) & !GAMEMODE_SELECTED)
+	{
+		tinygl_clear();
+		GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;
+		tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);
+	}
 
-   if (button_push_event_p(0))
+	button_update();
+
+	if (button_push_event_p(0) & !GAMEMODE_SELECTED)
+	{
+		// If button is pushed, gamemode (that's displayed) is selected
+		GAMEMODE_SELECTED = true;
+		tinygl_clear();
+		tinygl_text(START_GAME_PROMPT);
+	}
+	else if (button_push_event_p(0)) 
+	{
+		// "Game starts when gamemode is selected and button pushed"	
+		game_start();
+	}
+}
+
+// if lives = 0, Disable game elements and toggle game state
+void decrease_lives(void)
+{
+   if (decrease_player_lives()) 
    {
-      game_start();
+	   ACTIVE_GAME = false;
+	   toggle_wall(false);
+	   character_disable();
+	   game_outro();
    }
 }
 
+/* Each gammode has different outcomes during collsions*/
+void gamemode_collsion_process(void)
+{
+   bool player_at_border;
+   switch((gamemode_t) GAME_MODE_index)
+   {
+   case HARD_MODE:
+   case THREE_LIVES:
+   		// Will simply reduce the number of lives by 1
+   		// stun is introduced to prevent multiple loss of lives from a single collision
+	    decrease_lives();
+ 		toggle_stun(true); // Automatically is unstun when wall moves again
+ 		break;
+   		
+   case WALL_PUSH:
 
-void check_game_end(void)
+   		// Will move character in direction of wall movement)
+		if (get_active_wall().wall_type == ROW) {
+			player_at_border = (get_active_wall().direction == NORTH) ? move_north(): move_south();
+		} else {
+			player_at_border = (get_active_wall().direction == EAST) ? move_east(): move_west();
+		}
+		toggle_wall(1); // Re-display the part of wall which collided with player
+			            // (which disappears after player is moved)
+		if (player_at_border)
+		{
+		    decrease_lives();
+		}
+   		break;
+	}
+}
+
+void check_collisions()
 {
    if (get_game_state())
-   {
-      if (collision_dectection())                           // Reset game variables
-      {
-         game_end();
-      }
-   }
-}
-
-
-//Disable game elements and toggle game state
-void game_end(void)
-{
-   ACTIVE_GAME = false;
-   toggle_wall(false);
-   character_disable();
-   game_outro();
+	{
+		if (collision_dectection() & !get_stun_condition())      
+		{
+			gamemode_collsion_process();
+		}
+	}
 }
 
 
@@ -103,8 +185,6 @@ void game_outro(void)
 
    uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
    tinygl_text(end_message);
-   // Right now
-   // in future can display score / level
    // maybe some epic music
 }
 
