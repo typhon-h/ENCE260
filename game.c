@@ -53,7 +53,7 @@ static void wall_task(void *data)
       else
       {
          move_wall();
-         
+
          // Allows player to move after a potential collision
          toggle_stun(0);
       }
@@ -71,7 +71,6 @@ static void character_task(void *data)
    if (get_game_state())
    {
       character_update();
-      check_collisions();
    }
 }
 
@@ -117,7 +116,7 @@ int main(void)
    game_init(MESSAGE_RATE);
 
    // Task definitions
-   task_t tasks[5] =
+   task_t tasks[] =
    {
       { .func = display_task,    .period = TASK_RATE / DISPLAY_UPDATE_RATE },
       { .func = character_task,  .period = TASK_RATE / INPUT_UPDATE_RATE   },

@@ -58,11 +58,14 @@ Position_t get_character_pos(void)
 /** Move character 1 unit west*/
 bool move_west()
 {
-   if (WEST_CHARACTER_BOUNDARY < CHARACTER_POS.x)
+   if ((WEST_CHARACTER_BOUNDARY < CHARACTER_POS.x) && !display_pixel_get(CHARACTER_POS.x - 1, CHARACTER_POS.y))
    {
       display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
       CHARACTER_POS.x -= 1;
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+      if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
+      {
+         display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+      }
       return 0;
    }
    return 1;
@@ -72,11 +75,14 @@ bool move_west()
 /** Move character 1 unit east*/
 bool move_east()
 {
-   if (EAST_CHARACTER_BOUNDARY > CHARACTER_POS.x)
+   if ((EAST_CHARACTER_BOUNDARY > CHARACTER_POS.x) && !display_pixel_get(CHARACTER_POS.x + 1, CHARACTER_POS.y))
    {
       display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
       CHARACTER_POS.x += 1;
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+      if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
+      {
+         display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+      }
       return 0;
    }
    return 1;
@@ -86,11 +92,14 @@ bool move_east()
 /** Move character 1 unit north*/
 bool move_north()
 {
-   if (NORTH_CHARACTER_BOUNDARY < CHARACTER_POS.y)
+   if ((NORTH_CHARACTER_BOUNDARY < CHARACTER_POS.y) && !display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y - 1))
    {
       display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
       CHARACTER_POS.y -= 1;
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+      if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
+      {
+         display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+      }
       return 0;
    }
    return 1;
@@ -100,11 +109,12 @@ bool move_north()
 /** Move character 1 unit south*/
 bool move_south()
 {
-   if (SOUTH_CHARACTER_BOUNDARY > CHARACTER_POS.y)
+   if ((SOUTH_CHARACTER_BOUNDARY > CHARACTER_POS.y) && !display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y + 1))
    {
       display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
       CHARACTER_POS.y += 1;
       display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+
       return 0;
    }
    return 1;
