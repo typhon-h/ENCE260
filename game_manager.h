@@ -12,6 +12,19 @@
 
 #include "system.h"
 
+typedef enum {
+	HARD_MODE = 0,
+	THREE_LIVES,
+	WALL_PUSH
+} gamemode_t;
+
+// Add more if perferred.
+#define DIFFERENT_GAMEMODES 3
+#define HARD_MODE_TEXT      " HARDMODE "
+#define THREE_LIVES_TEXT    " THREE LIVES "
+#define WALL_PUSH_TEXT      " WALL PUSH "
+
+
 // Initialize game manager
 void game_init(uint8_t message_rate);
 
@@ -28,10 +41,10 @@ void game_start(void);
 void game_state_update(void);
 
 // Check game ending conditions and end the game
-void check_game_end(void);
+void check_collisions(void);
 
 //Stop the current game and open game outro
-void game_end(void);
+void decrease_lives(void);
 
 // Post game menu - Game over screen and score
 void game_outro(void);
