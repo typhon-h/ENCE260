@@ -18,6 +18,8 @@
 #include "../fonts/font3x5_1.h"
 #include "uint8toa.h"
 
+#include "sound.h"
+
 #define GAME_MODE_PROMPT    " SELECT GAME MODE "
 #define END_PROMPT          " GAME OVER SCORE:"  //Additional whitespace to insert score
 #define END_PROMPT_LEN      17
@@ -88,7 +90,6 @@ void game_start()
    character_init(player_lives);
    wall_init();
    SCORE = 0;
-
    ACTIVE_GAME = true;
 }
 

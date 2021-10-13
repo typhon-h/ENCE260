@@ -11,38 +11,37 @@
 #include "wall.h"
 #include "game_manager.h"
 #include "tinygl.h"
-
-//Surpress warnings for unused function parameters
-#define UNUSED(PARAM)    (void)(PARAM)
+#include "sound.h"
 
 //Frequency of task execution in hz
 #define DISPLAY_UPDATE_RATE            300
 #define INPUT_UPDATE_RATE              20
 #define MESSAGE_RATE                   20  // Tinygl text scroll speed
 
+//Sound rate constants
+#define TWEETER_TASK_RATE              5000
+#define MELODY_TASK_RATE               100
+#define MELODY_BPM_DEFAULT             200
+
 //Difficulty constants
 #define WALL_SPEED_INCREMENT_RATE      20  // Delay before speed increment in seconds
 #define WALL_SPEED_INCREMENT_AMOUNT    1   // Amount wall speed increases by (walls/second)
 #define DEFAULT_SPEED                  1   // Default starting wall speed
 
-#define WALL_TASK_INDEX                2   //Index of the wall task object within tasks array
+#define WALL_TASK_INDEX                4   //Index of the wall task object within tasks array
 
 static uint8_t WALL_SPEED = DEFAULT_SPEED; // Default wall speed (walls/second)
 
 // Update display
-static void display_task(void *data)
+static void display_task(__unused__ void *data)
 {
-   UNUSED(data);
    tinygl_update();  //Update scrolling text
-   display_update();
 }
 
 
 // Update walls - move existing wall or create new wall and increment score
-static void wall_task(void *data)
+static void wall_task(__unused__ void *data)
 {
-   UNUSED(data);
-
    if (get_game_state())
    {
       if (get_active_wall().wall_type == OUT_OF_BOUNDS)
@@ -64,10 +63,8 @@ static void wall_task(void *data)
 
 
 // Poll input and update character position
-static void character_task(void *data)
+static void character_task(__unused__ void *data)
 {
-   UNUSED(data);
-
    if (get_game_state())
    {
       character_update();
@@ -107,6 +104,18 @@ static void difficulty_task(void *data)
 }
 
 
+static void tweeter_task(__unused__ void *data)
+{
+   speaker_update();
+}
+
+
+static void melody_task(__unused__ void *data)
+{
+   sound_update();
+}
+
+
 int main(void)
 {
    // Module initialization
@@ -114,10 +123,12 @@ int main(void)
    display_init();
    tinygl_init(DISPLAY_UPDATE_RATE);
    game_init(MESSAGE_RATE);
-
+   sound_init(TWEETER_TASK_RATE, MELODY_TASK_RATE, MELODY_BPM_DEFAULT);
    // Task definitions
    task_t tasks[] =
    {
+      { .func = tweeter_task,    .period = TASK_RATE / TWEETER_TASK_RATE   },
+      { .func = melody_task,     .period = TASK_RATE / MELODY_TASK_RATE    },
       { .func = display_task,    .period = TASK_RATE / DISPLAY_UPDATE_RATE },
       { .func = character_task,  .period = TASK_RATE / INPUT_UPDATE_RATE   },
       { .func = wall_task,       .period = TASK_RATE / WALL_SPEED          },
@@ -126,5 +137,5 @@ int main(void)
    };
 
    // Run tasks
-   task_schedule(tasks, 5);
+   task_schedule(tasks, ARRAY_SIZE(tasks));
 }
