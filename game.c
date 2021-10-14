@@ -42,7 +42,7 @@ static void display_task(__unused__ void *data)
 // Update walls - move existing wall or create new wall and increment score
 static void wall_task(__unused__ void *data)
 {
-   if (get_game_state())
+   if (get_game_state() & !get_pause_state())
    {
       if (get_active_wall().wall_type == OUT_OF_BOUNDS)
       {
@@ -65,7 +65,7 @@ static void wall_task(__unused__ void *data)
 // Poll input and update character position
 static void character_task(__unused__ void *data)
 {
-   if (get_game_state())
+   if (get_game_state()& !get_pause_state())
    {
       character_update();
    }
@@ -84,22 +84,26 @@ static void start_game_task(void *data)
       task->period = TASK_RATE / WALL_SPEED;
       game_state_update();
    }
+	check_pause_button();
 }
 
 
 // Increase game difficulty by incrementing wall speed
 static void difficulty_task(void *data)
 {
-   static uint8_t counter = 0;
-   task_t         *task   = data;
-
-   task->period = TASK_RATE / WALL_SPEED;
-   counter++;
-   if (counter >= WALL_SPEED_INCREMENT_RATE)
+   if (!get_pause_state())
    {
-      WALL_SPEED  += WALL_SPEED_INCREMENT_AMOUNT;
-      task->period = TASK_RATE / WALL_SPEED;
-      counter      = 0;
+	   static uint8_t counter = 0;
+	   task_t         *task   = data;
+
+	   task->period = TASK_RATE / WALL_SPEED;
+	   counter++;
+	   if (counter >= WALL_SPEED_INCREMENT_RATE)
+	   {
+		  WALL_SPEED  += WALL_SPEED_INCREMENT_AMOUNT;
+		  task->period = TASK_RATE / WALL_SPEED;
+		  counter      = 0;
+	   }
    }
 }
 
