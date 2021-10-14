@@ -83,7 +83,7 @@ static void start_game_task(void *data)
       task->period = TASK_RATE / WALL_SPEED;
       game_state_update();
    }
-	check_pause_button();
+   check_pause_button();
 }
 
 
@@ -92,17 +92,17 @@ static void difficulty_task(void *data)
 {
    if (!get_pause_state())
    {
-	   static uint8_t counter = 0;
-	   task_t         *task   = data;
+      static uint8_t counter = 0;
+      task_t         *task   = data;
 
-	   task->period = TASK_RATE / WALL_SPEED;
-	   counter++;
-	   if (counter >= WALL_SPEED_INCREMENT_RATE)
-	   {
-		  WALL_SPEED  += WALL_SPEED_INCREMENT_AMOUNT;
-		  task->period = TASK_RATE / WALL_SPEED;
-		  counter      = 0;
-	   }
+      task->period = TASK_RATE / WALL_SPEED;
+      counter++;
+      if (counter >= WALL_SPEED_INCREMENT_RATE)
+      {
+         WALL_SPEED  += WALL_SPEED_INCREMENT_AMOUNT;
+         task->period = TASK_RATE / WALL_SPEED;
+         counter      = 0;
+      }
    }
 }
 

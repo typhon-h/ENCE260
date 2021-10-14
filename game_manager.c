@@ -25,26 +25,26 @@
 #define END_PROMPT          " GAME OVER SCORE:"  //Additional whitespace to insert score
 #define END_PROMPT_LEN      17
 #define SIZE_OF_UINT8       8                    //For buffer on end message for score
-  
-#define MENU_TONE      "D#"
-#define END_MUSIC_BPM  114
-#define MUSIC_BPM      200
 
-char GAME_MUSIC[] = { //Music to loop during gameplay
-    #include "sounds/megalovania.mmel"
-    " :" // Loop infinitely
+#define MENU_TONE           "A"
+
+char GAME_MUSIC[] =   //Music to loop during gameplay
+{
+#include "sounds/megalovania.mmel"
+         " :"           // Loop infinitely
 };
-char END_GAME_MUSIC[] = { //End menu music
-    #include "sounds/rick_roll.mmel"
-    " :"
+char END_GAME_MUSIC[] = //End menu music
+{
+#include "sounds/rick_roll.mmel"
+         " :" // Loop indefinitely
 };
 
 
-bool    ACTIVE_GAME     = false;
-uint8_t SCORE           = 0;         // has a max of 255
-uint8_t GAME_MODE_index = 0;
+bool    ACTIVE_GAME      = false;
+uint8_t SCORE            = 0;        // has a max of 255
+uint8_t GAME_MODE_index  = 0;
 uint8_t WALL_RANDOM_SEED = 0;
-bool PAUSE_STATUS      = false;
+bool    PAUSE_STATUS     = false;
 
 char *GAMEMODE_STRINGS[] =
 {
@@ -77,11 +77,13 @@ bool get_game_state()
    return ACTIVE_GAME;
 }
 
+
 // Returns the PAUSE state of the game
 bool get_pause_state()
 {
    return PAUSE_STATUS;
 }
+
 
 //Increment score
 void increment_score()
@@ -89,16 +91,26 @@ void increment_score()
    SCORE++;
 }
 
-// Checks for button input to pauzse game
+
+// Checks for button input to pause game
 void check_pause_button(void)
 {
-	button_update();
-	if (button_push_event_p(0) & ACTIVE_GAME)
-	{
-		PAUSE_STATUS = !PAUSE_STATUS;
-		led_set(LED1, PAUSE_STATUS);
-	}
+   button_update();
+   if (button_push_event_p(0) & ACTIVE_GAME)
+   {
+      PAUSE_STATUS = !PAUSE_STATUS;
+      led_set(LED1, PAUSE_STATUS);
+      if (PAUSE_STATUS)
+      {
+         sound_play(MENU_TONE);
+      }
+      else
+      {
+         sound_play(GAME_MUSIC);
+      }
+   }
 }
+
 
 // Initialize game components and toggle game state
 void game_start()
@@ -126,10 +138,9 @@ void game_start()
    tinygl_clear();
    character_init(player_lives);
    wall_init(WALL_RANDOM_SEED);
-   
-   BPM_change(MUSIC_BPM);
+
    sound_play(GAME_MUSIC);
-   SCORE = 0;
+   SCORE       = 0;
    ACTIVE_GAME = true;
 }
 
@@ -153,7 +164,7 @@ void game_state_update()
    }
 
    button_update();
-   
+
    if (button_push_event_p(0))
    {
       if (game_end) //Show mode menu if pressed at end of game
@@ -243,7 +254,6 @@ void game_outro(void)
 
    uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
    tinygl_text(end_message);
-   BPM_change(END_MUSIC_BPM);
    sound_play(END_GAME_MUSIC);
 }
 
