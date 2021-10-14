@@ -51,9 +51,13 @@ void sound_play(char song[]) //Play song
 
 void beep() // Single beep used for testing
 {
-    mmelody_play(melody, "C");
+    mmelody_play(melody, "C,C+,C");
 }
 
+void BPM_change(uint16_t tune_bpm_rate) // Update BPM of melody
+{
+	mmelody_speed_set(melody, tune_bpm_rate);
+}
 
 // Initialize sound drivers
 void sound_init(uint16_t tweeter_task_rate, uint16_t tune_task_rate, uint16_t tune_bpm_rate)
