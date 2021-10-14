@@ -34,6 +34,9 @@ ledmat.o: ../../drivers/ledmat.c ../../drivers/avr/pio.h ../../drivers/avr/syste
 pio.o: ../../drivers/avr/pio.c ../../drivers/avr/pio.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
+led.o: ../../drivers/led.c ../../drivers/led.h ../../drivers/avr/pio.h ../../drivers/avr/system.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
 task.o: ../../utils/task.c ../../utils/task.h ../../drivers/avr/system.h ../../drivers/avr/timer.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
@@ -58,7 +61,7 @@ wall.o: wall.c wall.h ../../drivers/display.h character.h game_manager.h
 uint8toa.o: ../../utils/uint8toa.c ../../utils/uint8toa.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font3x5_1.h ../../utils/uint8toa.h sound.h
+game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font3x5_1.h ../../utils/uint8toa.h ../../drivers/led.h sound.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 mmelody.o: ../../extra/mmelody.c ../../extra/mmelody.h ../../drivers/avr/system.h
@@ -70,7 +73,7 @@ tweeter.o: ../../extra/tweeter.c ../../extra/tweeter.h ../../drivers/avr/system.
 sound.o: sound.c ../../extra/tweeter.h ../../extra/mmelody.h ../../drivers/avr/pio.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
 # Link: create ELF output file from object files.
-game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o tinygl.o font.o uint8toa.o game_manager.o task.o timer.o mmelody.o sound.o tweeter.o
+game.out: game.o system.o navswitch.o display.o ledmat.o pio.o character.o wall.o button.o tinygl.o font.o uint8toa.o game_manager.o task.o timer.o mmelody.o sound.o tweeter.o led.o
 	$(CC) $(CFLAGS) $^ -o $@ -lm
 	$(SIZE) $@
 
