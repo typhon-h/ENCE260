@@ -56,7 +56,6 @@ static void wall_task(__unused__ void *data)
          // Allows player to move after a potential collision
          toggle_stun(0);
       }
-
       check_collisions();
    }
 }
@@ -65,7 +64,7 @@ static void wall_task(__unused__ void *data)
 // Poll input and update character position
 static void character_task(__unused__ void *data)
 {
-   if (get_game_state()& !get_pause_state())
+   if (get_game_state() & !get_pause_state())
    {
       character_update();
    }
