@@ -15,8 +15,6 @@ static mmelody_t     melody;
 static mmelody_obj_t melody_info;
 static tweeter_obj_t tweeter_info;
 
-
-
 // Activate speaker
 void toggle_speaker(bool state)
 {
@@ -43,6 +41,12 @@ void sound_update() // Update current sound
 void sound_stop() // Stop playing current sound
 {
    mmelody_play(melody, "");
+}
+
+
+void sound_play(char song[]) //Play song
+{
+    mmelody_play(melody, song);
 }
 
 void beep() // Single beep used for testing

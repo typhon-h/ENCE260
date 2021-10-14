@@ -16,6 +16,9 @@ void sound_update(void);
 // Stop playing current sound
 void sound_stop(void);
 
+//Play song
+void sound_play(char song[]);
+
 // Single beep used for testing
 void beep(void);
 

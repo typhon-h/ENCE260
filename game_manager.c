@@ -26,6 +26,17 @@
 #define SIZE_OF_UINT8       8                    //For buffer on end message for score
 
 
+#define MENU_TONE "D#"
+char GAME_MUSIC[] = { //Music to loop during gameplay
+    #include "sounds/megalovania.mmel"
+    " :" // Loop infinitely
+};
+char END_GAME_MUSIC[] = { //End menu music
+    #include "sounds/rick_roll.mmel"
+    " :" // Loop infinitely
+};
+
+
 bool    ACTIVE_GAME     = false;
 uint8_t SCORE           = 0;         // has a max of 255
 uint8_t GAME_MODE_index = 0;
@@ -36,6 +47,7 @@ char *GAMEMODE_STRINGS[] =
    THREE_LIVES_TEXT,
    WALL_PUSH_TEXT
 };
+
 
 // Initialize game manager, starts game menu
 void game_init(uint8_t message_rate)
@@ -89,6 +101,7 @@ void game_start()
    tinygl_clear();
    character_init(player_lives);
    wall_init();
+   sound_play(GAME_MUSIC);
    SCORE = 0;
    ACTIVE_GAME = true;
 }
@@ -109,6 +122,7 @@ void game_state_update()
       GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;
       tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);
       gamemode_selected = true;
+      sound_play(MENU_TONE);
    }
 
    button_update();
@@ -120,13 +134,16 @@ void game_state_update()
          tinygl_clear();
          tinygl_text(GAME_MODE_PROMPT);
          game_end = false;
+         sound_play(MENU_TONE);
       }
       else if (gamemode_selected)
       {
          // "Game starts when gamemode is selected and button pushed"
          gamemode_selected = false; //Game mode menu reappears on restart
          game_end          = true;  //Next menu will be end of game
+         sound_play(MENU_TONE);
          game_start();
+
       }
    }
 }
@@ -200,7 +217,7 @@ void game_outro(void)
 
    uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
    tinygl_text(end_message);
-   // maybe some epic music
+   sound_play(END_GAME_MUSIC);
 }
 
 
