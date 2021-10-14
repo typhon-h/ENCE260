@@ -26,7 +26,10 @@
 #define END_PROMPT_LEN      17
 #define SIZE_OF_UINT8       8                    //For buffer on end message for score
   
-#define MENU_TONE "D#"
+#define MENU_TONE      "D#"
+#define END_MUSIC_BPM  114
+#define MUSIC_BPM      200
+
 char GAME_MUSIC[] = { //Music to loop during gameplay
     #include "sounds/megalovania.mmel"
     " :" // Loop infinitely
@@ -123,6 +126,8 @@ void game_start()
    tinygl_clear();
    character_init(player_lives);
    wall_init(WALL_RANDOM_SEED);
+   
+   BPM_change(MUSIC_BPM);
    sound_play(GAME_MUSIC);
    SCORE = 0;
    ACTIVE_GAME = true;
@@ -238,7 +243,7 @@ void game_outro(void)
 
    uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
    tinygl_text(end_message);
-   BPM_change(114);
+   BPM_change(END_MUSIC_BPM);
    sound_play(END_GAME_MUSIC);
 }
 
