@@ -19,6 +19,7 @@
 #include "uint8toa.h"
 
 #include "sound.h"
+#include "led.h"
 
 #define GAME_MODE_PROMPT    " SELECT GAME MODE "
 #define END_PROMPT          " GAME OVER SCORE:"  //Additional whitespace to insert score
@@ -40,6 +41,7 @@ char END_GAME_MUSIC[] = { //End menu music
 bool    ACTIVE_GAME     = false;
 uint8_t SCORE           = 0;         // has a max of 255
 uint8_t GAME_MODE_index = 0;
+bool PAUSE_STATUS      = false;
 
 char *GAMEMODE_STRINGS[] =
 {
@@ -53,6 +55,8 @@ char *GAMEMODE_STRINGS[] =
 void game_init(uint8_t message_rate)
 {
    button_init();
+   led_init();
+   led_set(LED1, 0);
    tinygl_text_speed_set(message_rate);
    tinygl_font_set(&font3x5_1);
    tinygl_text_mode_set(TINYGL_TEXT_MODE_SCROLL);
@@ -67,6 +71,11 @@ bool get_game_state()
    return ACTIVE_GAME;
 }
 
+// Returns the PAUSE state of the game
+bool get_pause_state()
+{
+   return PAUSE_STATUS;
+}
 
 //Increment score
 void increment_score()
@@ -74,6 +83,16 @@ void increment_score()
    SCORE++;
 }
 
+// Checks for button input to pauzse game
+void check_pause_button(void)
+{
+	button_update();
+	if (button_push_event_p(0) & ACTIVE_GAME)
+	{
+		PAUSE_STATUS = !PAUSE_STATUS;
+		led_set(LED1, PAUSE_STATUS);
+	}
+}
 
 // Initialize game components and toggle game state
 void game_start()
