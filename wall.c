@@ -1,4 +1,4 @@
-/** @file   wall.c
+ /** @file   wall.c
  *  @author Lucas Trickett, Harrison Tyson
  *  @date   5 Oct 2021
  *  @brief  Wall profiles
@@ -15,9 +15,9 @@ static Wall_t ACTIVE_WALL;
 
 
 // Sets seed for wall generation
-void wall_init()
+void wall_init(uint8_t initial_seed)
 {
-   srand(rand());
+   srand(initial_seed);
    //Reset wall if active wall exists
    ACTIVE_WALL.wall_type = OUT_OF_BOUNDS;
    ACTIVE_WALL.bit_data  = 0;
