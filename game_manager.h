@@ -34,6 +34,12 @@ void increment_score(void);
 // Return current state of game (is it being played)
 bool get_game_state(void);
 
+// Retturn PAUSE state of the game (should i pause)
+bool get_pause_state(void);
+
+// Checks button input to update PAUSE update
+void check_pause_button(void);
+
 // Initialize game components and toggle game state
 void game_start(void);
 
