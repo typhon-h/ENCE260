@@ -25,8 +25,7 @@
 #define END_PROMPT          " GAME OVER SCORE:"  //Additional whitespace to insert score
 #define END_PROMPT_LEN      17
 #define SIZE_OF_UINT8       8                    //For buffer on end message for score
-
-
+  
 #define MENU_TONE "D#"
 char GAME_MUSIC[] = { //Music to loop during gameplay
     #include "sounds/megalovania.mmel"
@@ -34,13 +33,14 @@ char GAME_MUSIC[] = { //Music to loop during gameplay
 };
 char END_GAME_MUSIC[] = { //End menu music
     #include "sounds/rick_roll.mmel"
-    " :" // Loop infinitely
+    " :"
 };
 
 
 bool    ACTIVE_GAME     = false;
 uint8_t SCORE           = 0;         // has a max of 255
 uint8_t GAME_MODE_index = 0;
+uint8_t WALL_RANDOM_SEED = 0;
 bool PAUSE_STATUS      = false;
 
 char *GAMEMODE_STRINGS[] =
@@ -68,6 +68,9 @@ void game_init(uint8_t message_rate)
 // Return current state of game (is it being played)
 bool get_game_state()
 {
+   // As get_game_status() is called frequently in game.c (and is done so before game starts)
+   // gives random seed (as the number of times function is called depends of time on menu)
+   WALL_RANDOM_SEED++;
    return ACTIVE_GAME;
 }
 
@@ -119,7 +122,7 @@ void game_start()
 
    tinygl_clear();
    character_init(player_lives);
-   wall_init();
+   wall_init(WALL_RANDOM_SEED);
    sound_play(GAME_MUSIC);
    SCORE = 0;
    ACTIVE_GAME = true;
@@ -145,7 +148,7 @@ void game_state_update()
    }
 
    button_update();
-
+   
    if (button_push_event_p(0))
    {
       if (game_end) //Show mode menu if pressed at end of game
@@ -162,7 +165,6 @@ void game_state_update()
          game_end          = true;  //Next menu will be end of game
          sound_play(MENU_TONE);
          game_start();
-
       }
    }
 }
@@ -236,6 +238,7 @@ void game_outro(void)
 
    uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
    tinygl_text(end_message);
+   BPM_change(114);
    sound_play(END_GAME_MUSIC);
 }
 
