@@ -18,12 +18,12 @@
 #define DEFAULT_X                   2
 #define DEFAULT_Y                   3
 
-// Position coordinates structure
+// Player information (lives and position)
 typedef struct
 {
    uint8_t x, y;
    uint8_t lives;
-} Position_t;
+} PlayerInfoStruct;
 
 //Create the character at the default starting position
 void character_init(uint8_t life_count);
@@ -38,7 +38,7 @@ bool get_stun_condition(void);
 void character_disable(void);
 
 //Return current position of the character
-Position_t get_character_pos(void);
+PlayerInfoStruct get_character_pos(void);
 
 // Move the character in the given direction, restricted by boundary
 // Returns true if character is unable to move (For Push Wall gamemode)
