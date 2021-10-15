@@ -10,11 +10,15 @@
 #include "character.h"
 #include "game_manager.h"
 
-// Active moving wall
-static Wall_t ACTIVE_WALL;
+// Global variable used to store wall information
+static WallStruct ACTIVE_WALL;
 
 
-// Sets seed for wall generation
+/*  Initialises module
+ *  @params initial_seed: uses srand() from <stdlib.h> to set initial seed
+ *                        for pseudorandom number generator (PRNG)
+ *   @brief: Given deterministic nature of PRNG's, seed must vary game-to-game             
+ */
 void wall_init(uint8_t initial_seed)
 {
    srand(initial_seed);
@@ -24,20 +28,27 @@ void wall_init(uint8_t initial_seed)
 }
 
 
-//Returns the current active wall as Wall_t
-Wall_t get_active_wall()
+// Returns the current active wall as WallStruct
+WallStruct get_active_wall()
 {
    return ACTIVE_WALL;
 }
 
 
-/* Creates adds a wall and replaces with oldest one */
-Wall_t decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t hole_shift_seed)
+/*  Creates wall based on randomly generated integer inputs 
+ *  @params: All inputs are random uint8_t integers
+ *   @brief: Each input decides a different aspect of wall            
+ */
+WallStruct decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t hole_shift_seed)
 {
-   Wall_t  wall_n;
+   WallStruct  return_wall;
    uint8_t wall_bitmap;
-   uint8_t wall_direction = (direction_seed) % 4 + 1;
-   uint8_t hole_size      = (hole_size_seed) % 3 + 1;
+   
+   uint8_t wall_direction = (direction_seed) % 4 + 1;   // Random number in interval [1, 4], decides wall direction 
+   uint8_t hole_size      = (hole_size_seed) % 3 + 1;   // Random number in interval [1, 3], decides hole size
+   
+   // Randomly shift hole along the wall, must be less than (wall_size - hole_size) 
+   // (e.g. if ROW and hole_size is 3, shift must be less than 6-3)
    uint8_t wall_size      = (wall_direction <= 2) ? 6: 8;
    uint8_t hole_shift     = hole_shift_seed % (wall_size - hole_size);
 
@@ -60,88 +71,90 @@ Wall_t decide_wall_type(uint8_t direction_seed, uint8_t hole_size_seed, uint8_t 
       break;
    }
 
-   wall_bitmap = GENERATE_HOLE(hole_size, hole_shift);
-
+   wall_bitmap = GENERATE_HOLE(hole_size, hole_shift);   // Generates wall bit_data from MACRO function.
+   
+   // switch statement, creates wall based on direction (using MACROS in HEADER file)
    switch (wall_direction)
    {
-   case NORTH:     // NORTH moving wall
-      wall_n = (Wall_t)NORTH_MOVING_WALL(wall_bitmap);
+   case NORTH:      // NORTH moving wall, ROW, starts at row 6
+      return_wall = (WallStruct) NORTH_MOVING_WALL(wall_bitmap);
       break;
 
-   case EAST: // EAST moving wall
-      wall_n = (Wall_t)EAST_MOVING_WALL(wall_bitmap);
+   case EAST:       // EAST moving wall, COLUMN, starts at column 6
+      return_wall = (WallStruct) EAST_MOVING_WALL(wall_bitmap);
       break;
 
-   case SOUTH:    // SOUTH moving wall
-      wall_n = (Wall_t)SOUTH_MOVING_WALL(wall_bitmap);
+   case SOUTH:      // SOUTH moving wall, ROW, starts at row 0
+      return_wall = (WallStruct) SOUTH_MOVING_WALL(wall_bitmap);
       break;
 
-   case WEST: // WEST moving wall
-      wall_n = (Wall_t)WEST_MOVING_WALL(wall_bitmap);
+   case WEST:       // WEST moving wall, COLUMN, starts at column 4
+      return_wall = (WallStruct) WEST_MOVING_WALL(wall_bitmap);
       break;
 
-   default: // Won't ever occur but just incase - EAST moving wall
-      wall_n = (Wall_t)EAST_MOVING_WALL(wall_bitmap);
+   default:       // Won't occur, but just incase == EAST moving wall
+      return_wall = (WallStruct) EAST_MOVING_WALL(wall_bitmap);
       break;
    }
 
-   return wall_n;
+   return return_wall;
 }
 
 
-// Randomly generate a wall and spawn it in starting position
-// Avoids possibility of wall being reset prematurely
-// Won't matter atm, but could be useful when varying difficulty
+/*  Resets and randomises ACTIVE_WALL
+ *  @brief: starting random seed is initialised in wall_init() with srand()
+ *          uses helper function decide_wall_type() to create wall           
+ */
 void wall_create(void)
 {
-   // Possible seed using srand based off the tick when game activated via button/menu
-   // For greater variation
-
    // Randomly select wall-type using default seed
    uint8_t direction_seed  = rand();
    uint8_t hole_size_seed  = rand();
    uint8_t hole_shift_seed = rand();
 
    // Generate wall type
-   ACTIVE_WALL = decide_wall_type(direction_seed, hole_size_seed, hole_shift_seed);
+   ACTIVE_WALL = decide_wall_type(direction_seed, hole_size_seed, hole_shift_seed);   
 
-   //Display wall
-   toggle_wall(true);
+   toggle_wall(true);    //Display wall
 }
 
 
 /*  Toggles display state of ACTIVE_WALL
- *  @param display_on, if 0 display is removed
+ *  @param display_on: if 0 = then ACTIVE_WALL in wall.c isn't displayed
  */
 void toggle_wall(bool display_on)
-{
-   // Only one active wall so only need bool input
-
-   uint8_t    position = ACTIVE_WALL.pos;
-   uint8_t    pattern  = (display_on) ? ACTIVE_WALL.bit_data : 0;
-   uint8_t    index;
-   Position_t character = get_character_pos();
+{   
+   // If display is off, pattern if 0
+   uint8_t   pattern  = (display_on) ? ACTIVE_WALL.bit_data : 0;
+   uint8_t   index;
+   uint8_t   position = ACTIVE_WALL.pos; // Position of the wall
+    
+   PlayerInfoStruct character = get_character_pos();
 
    switch (ACTIVE_WALL.wall_type)
    {
-   case ROW:
-      for (index = 0; index <= DISPLAY_WIDTH; index++)
+   // If wall_type is ROW, position is in y-axis
+   case ROW: 
+      // FOR loop goes through each bit in wall
+      for (index = 0; index <= DISPLAY_WIDTH; index++) 
       {
-         bool state = (BIT(index) & pattern) != 0;
-         if ((index != character.x) || (position != character.y))
+         bool state = (BIT(index) & pattern) != 0;  // Gets the nth bit of the walls bit_data
+         if ((index != character.x) || (position != character.y)) // Wont display over character
          {
-            display_pixel_set(index, position, state);
+            display_pixel_set(index, position, state);  // display the state of each pixel in wall 
          }
       }
       break;
-
-   case COLUMN:
+   
+   // If wall_type is COLUMN, position is in x-axis
+   case COLUMN: 
+      // FOR loop goes through each bit in wall
       for (index = 0; index <= DISPLAY_HEIGHT; index++)
       {
-         bool state = (BIT(index) & pattern) != 0;
-         if ((position != character.x) || (index != character.y))
+         bool state = (BIT(index) & pattern) != 0;  // Gets the nth bit of the walls bit_data
+         if ((position != character.x) || (index != character.y)) // Wont display over character
          {
-            display_pixel_set(position, index, state);
+            display_pixel_set(position, index, state);  // display the state of each pixel in wall 
          }
       }
       break;
@@ -153,14 +166,19 @@ void toggle_wall(bool display_on)
 
 
 /*  Moves active wall in direction defined by wall
- *  @brief, moves wall, sets walls=NULL if out_of_bounds
+ *  @brief: moves wall, sets WALL_TYPE to OUT_OF_BOUNDS is greater than ACTIVE_WALL.boundary_cond
  */
 void move_wall()
 {
+   // Toggle wall display state to off before moving it 
    toggle_wall(false);
-   // if dir is EAST or SOUTH, pos++
+   
+   // As the enums SOUTH / EAST = 2 / 4, the below expression will increase position.
+   // As NORTH and WEST are directions of decreasing position, position will decreases
    ACTIVE_WALL.pos += (ACTIVE_WALL.direction % 2 == 0) ? 1: -1;
 
+   // Positions are unsigned, thus only one boundary check is needed
+   // (as for negative moving directions pos = 0 -> 255, = above boundary) 
    if (ACTIVE_WALL.pos > ACTIVE_WALL.boundary_cond)
    {
       ACTIVE_WALL.wall_type = OUT_OF_BOUNDS;
