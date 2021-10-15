@@ -3,6 +3,7 @@
  *  @date   10 Oct 2021
  *  @brief  Controls key game components:
  *          Menus
+ *          Various gamemodes
  *          Game Start/Stop
  *          Key events
  */
@@ -12,17 +13,19 @@
 
 #include "system.h"
 
+
+// enum containing all different gamemodes
 typedef enum {
 	HARD_MODE = 0,
 	THREE_LIVES,
 	WALL_PUSH
-} gamemode_t;
+} GAMEMODES_t;
 
-// Add more if perferred.
-#define DIFFERENT_GAMEMODES 3
-#define HARD_MODE_TEXT      " HARDMODE "
+// Menu text for each gamemode (for displaying)
+#define HARD_MODE_TEXT      " HARDMODE "    
 #define THREE_LIVES_TEXT    " THREE LIVES "
 #define WALL_PUSH_TEXT      " WALL PUSH "
+#define DIFFERENT_GAMEMODES 3
 
 
 // Initialize game manager
@@ -34,7 +37,7 @@ void increment_score(void);
 // Return current state of game (is it being played)
 bool get_game_state(void);
 
-// Retturn PAUSE state of the game (should i pause)
+// Retturn PAUSE state of the game (whether game should pause)
 bool get_pause_state(void);
 
 // Checks button input to update PAUSE update
@@ -46,16 +49,16 @@ void game_start(void);
 // Poll button input to start game
 void game_state_update(void);
 
-// Check game ending conditions and end the game
+// Checks if collision has occured whilst player isn't stunned
 void check_collisions(void);
 
-//Stop the current game and open game outro
+// Decrease player lives by 1
 void decrease_lives(void);
 
-// Post game menu - Game over screen and score
+// Post game menu - Game over screen, score and play ending music
 void game_outro(void);
 
-// Returns collsion status when given a position
+// Returns collsion status of the game (player in wall)
 bool collision_dectection(void);
 
 #endif
