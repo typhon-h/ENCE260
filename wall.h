@@ -16,58 +16,65 @@
  */
 #define GENERATE_HOLE(SIZE, SHIFT)    (~(SIZE << (SHIFT)))
 
-//Wall movement restrictions
+// Wall movement restrictions
 #define NORTH_WALL_BOUNDARY    0
 #define EAST_WALL_BOUNDARY     4
 #define SOUTH_WALL_BOUNDARY    6
 #define WEST_WALL_BOUNDARY     0
 
-// Initialisation MACROs for each wall type
-#define EAST_MOVING_WALL(X)     { (X), (0), (EAST_WALL_BOUNDARY), (COLUMN), (EAST) } //Move wall right
-#define WEST_MOVING_WALL(X)     { (X), (4), (EAST_WALL_BOUNDARY), (COLUMN), (WEST) } //Move wall left
-#define NORTH_MOVING_WALL(X)    { (X), (6), (SOUTH_WALL_BOUNDARY), (ROW), (NORTH) }  //Move wall up
-#define SOUTH_MOVING_WALL(X)    { (X), (0), (SOUTH_WALL_BOUNDARY), (ROW), (SOUTH) }  //Move wall down
+/* Initialisation MACROs for each wall type 
+ * Each entry represents starting state of each wall type
+ *    X ~ wall bit_data 
+*/ 
+#define EAST_MOVING_WALL(X)     { (X), (0), (EAST_WALL_BOUNDARY), (COLUMN), (EAST) } // Initial EAST wall
+#define WEST_MOVING_WALL(X)     { (X), (4), (EAST_WALL_BOUNDARY), (COLUMN), (WEST) } // Initial WEST wall
+#define NORTH_MOVING_WALL(X)    { (X), (6), (SOUTH_WALL_BOUNDARY), (ROW), (NORTH) }  // Initial NORTH wall
+#define SOUTH_MOVING_WALL(X)    { (X), (0), (SOUTH_WALL_BOUNDARY), (ROW), (SOUTH) }  // Initial SOUTH wall
 
 
-// ENUM representing wall movement direction
+// declaration of all possible wall movement directions
 typedef enum
 {
    NORTH = 1,
-   SOUTH = 2,
-   WEST  = 3,
-   EAST  = 4
+   SOUTH,
+   WEST,
+   EAST
 } WALL_DIRECTION;
 
-// Represents wll_type (i.e. if its displayed along a coplumn or row)
+
+// WALL_TYPE defiinition, wall is either along a COLUMN, ROW or it's OUT_OF_BOUNDS
 typedef enum
 {
-   COLUMN, ROW, OUT_OF_BOUNDS
+   COLUMN, ROW, OUT_OF_BOUNDS  
 } WALL_TYPE;
 
 
-// Type definition for a wall
+/* structure containing aspects of moving wall
+*/ 
 typedef struct
 {
-   uint8_t        bit_data;      // 0b11000111 -- (1= Non-passible, 0=Passible)
-   uint8_t        pos;           // 0, 1, 2, 3, ...
-   uint8_t        boundary_cond; // If pos>coundary_cond for wall deletion
-   WALL_TYPE      wall_type;     // WALL_TYPE are COLUMN and ROW
-   WALL_DIRECTION direction;     // The direction of movement of wall
-} Wall_t;                        // Wall object
+   uint8_t         bit_data;      // 0b11000111 -- (1= Non-passible, 0=Passible)
+   uint8_t         pos;           // 0, 1, 2, 3, ...
+   uint8_t         boundary_cond; // If pos>coundary_cond for wall deletion
+   WALL_TYPE       wall_type;     // WALL_TYPE are COLUMN and ROW
+   WALL_DIRECTION  direction;     // The direction of movement of wall
 
-// Set seed for wall generation
+} WallStruct;       // Wall object
+
+
+// Set random seed for wall generation, reset global ACTIVE_WALL
 void wall_init(uint8_t initial_seed);
 
-//Return active wall information as Wall_t type
-Wall_t get_active_wall(void);
+//Return ACTIVE_WALL information as WallStruct type
+WallStruct get_active_wall(void);
 
-// Create a wall and spawn it in starting position
+// Reset and randomise the global WallStruct ACTIVE_WALL
 void wall_create(void);
 
 // Toggle wall visibilty on display
 void toggle_wall(bool display_on);
 
-// Shift wall in increment direction (contained within the wall)
+// Move wall in it's direction (contained within the WallStruct)
 void move_wall(void);
 
 #endif
