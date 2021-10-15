@@ -33,6 +33,7 @@ char GAME_MUSIC[] =   //Music to loop during gameplay
 #include "sounds/megalovania.mmel"
          " :"           // Loop infinitely
 };
+
 char END_GAME_MUSIC[] = //End menu music
 {
 #include "sounds/rick_roll.mmel"
@@ -54,7 +55,10 @@ char *GAMEMODE_STRINGS[] =
 };
 
 
-// Initialize game manager, starts game menu
+/*  Initialize game manager, LED and starts game menu 
+ *  @param message_rate: text scroll speed of MENU texts
+ *  @brief: using 3x5 font, displays " SELECT GAME MODE "
+ */
 void game_init(uint8_t message_rate)
 {
    button_init();
@@ -68,84 +72,98 @@ void game_init(uint8_t message_rate)
 }
 
 
-// Return current state of game (is it being played)
+/*  Return current state of game, increments WALL_RANDOM_SEED
+ *  @brief: number of calls to function (during menus) depends of time spent on menus
+ *          ensures that random seed for wall_init() is always different
+ */
 bool get_game_state()
 {
-   // As get_game_status() is called frequently in game.c (and is done so before game starts)
-   // gives random seed (as the number of times function is called depends of time on menu)
-   WALL_RANDOM_SEED++;
+   WALL_RANDOM_SEED++; // Increments global variable WALL_RANDOM_SEED
    return ACTIVE_GAME;
 }
 
 
-// Returns the PAUSE state of the game
+/*  Returns the pause state of the game
+ */
 bool get_pause_state()
 {
    return PAUSE_STATUS;
 }
 
 
-//Increment score
+/*  Increments game score
+ *  @brief: as there is a single moving wall, this is called ervery time the wall resets
+ */
 void increment_score()
 {
    SCORE++;
 }
 
 
-// Checks for button input to pause game
+/*  Checks for button input to pause game
+ *  @brief: button only pauses game if the game is active
+ *          MENU_TONE is playedduring paused state
+ */
 void check_pause_button(void)
 {
-   button_update();
-   if (button_push_event_p(0) & ACTIVE_GAME)
+   button_update(); // Update button input
+   if (button_push_event_p(0) & ACTIVE_GAME) // if button is pressed AND game is active
    {
-      PAUSE_STATUS = !PAUSE_STATUS;
-      led_set(LED1, PAUSE_STATUS);
+      PAUSE_STATUS = !PAUSE_STATUS; // Toggles pause state each press
+      led_set(LED1, PAUSE_STATUS);  // If paused, LED lights up
       if (PAUSE_STATUS)
       {
-         sound_play(MENU_TONE);
+         sound_play(MENU_TONE);     // If paused, MENU_TONE is played
       }
       else
       {
-         sound_play(GAME_MUSIC);
+         sound_play(GAME_MUSIC);    // if not paused, GAME_MUSIC is played
       }
    }
 }
 
 
-// Initialize game components and toggle game state
+
+/*  Initialize game components when starting
+ *  @brief: button only pauses game if the game is active
+ *          MENU_TONE is playedduring paused state
+ */
 void game_start()
 {
    uint8_t player_lives;
 
-   switch ((gamemode_t)GAME_MODE_index)
+   switch ((GAMEMODES_t)GAME_MODE_index)
    {
    case THREE_LIVES:
-      player_lives = 3;
+      player_lives = 3;       // Can collide with wall up to 3 times
       break;
 
    case HARD_MODE:
-      player_lives = 1;
+      player_lives = 1;       // Instant death upon collision
       break;
 
    case WALL_PUSH:
-      player_lives = 1;           //Death intant for OUT_OF_BOUNDS
+      player_lives = 1;       // Death instant for OUT_OF_BOUNDS
       break;
 
    default:
-      player_lives = 3;   //Defaults to Three-lives
+      player_lives = 3;   // Game will default to three_lives mode (if index > 3)
    }
+ 
+   tinygl_clear();                // Clear display
+   character_init(player_lives);  // Initialise character module (with given lives)
+   wall_init(WALL_RANDOM_SEED);   // Initialises wall module with random seed
 
-   tinygl_clear();
-   character_init(player_lives);
-   wall_init(WALL_RANDOM_SEED);
-
-   sound_play(GAME_MUSIC);
-   SCORE       = 0;
-   ACTIVE_GAME = true;
+   sound_play(GAME_MUSIC);        // PLays game music 
+   SCORE       = 0;               // Reset gamescore (from previous games)
+   ACTIVE_GAME = true;            // game is started so ACTIVE_GAME is true
 }
 
 
-// Poll button input to start game
+/*  Updates game states 
+ *  @brief: button only pauses game if the game is active
+ *          MENU_TONE is played during paused state
+ */
 void game_state_update()
 {
    static bool gamemode_selected = false;
@@ -157,13 +175,13 @@ void game_state_update()
    if (navswitch_push_event_p(NAVSWITCH_PUSH) && !game_end)
    {
       tinygl_clear();
-      GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;
-      tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);
+      GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;   // Update GAMEMODE_index (currently selected)
+      tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);                  // Display different gamemode text
       gamemode_selected = true;
       sound_play(MENU_TONE);
    }
 
-   button_update();
+   button_update(); // Update button input
 
    if (button_push_event_p(0))
    {
@@ -186,7 +204,10 @@ void game_state_update()
 }
 
 
-// if lives = 0, Disable game elements and toggle game state
+/*  Decreases player lives 
+ *  @brief: decrease_player_lives() decreases lives and return true is lives = 0
+ *          if lives = 0, game enters ending state
+ */
 void decrease_lives(void)
 {
    if (decrease_player_lives())
@@ -199,12 +220,17 @@ void decrease_lives(void)
 }
 
 
-/* Each gammode has different outcomes during collsions*/
+
+/*  Outlines the outcome of a collsion (decided by each game_mode) 
+ *  @brief: HARDMODE    = dcreases lives (only 1 life so instant death)
+ *          THREE_LIVES = dcreases lives (from which player has 3)
+ *          WALL_PUSH   = "pushes" by moving player in direction of wall momvement
+ */
 void gamemode_collsion_process(void)
 {
-   bool player_at_border;
+   bool player_at_border; // boolean describing if player is pushed beyond border
 
-   switch ((gamemode_t)GAME_MODE_index)
+   switch ((GAMEMODES_t)GAME_MODE_index)
    {
    case HARD_MODE:
    case THREE_LIVES:
@@ -215,20 +241,24 @@ void gamemode_collsion_process(void)
       break;
 
    case WALL_PUSH:
-
       // Will move character in direction of wall movement)
-      if (get_active_wall().wall_type == ROW)
+      if (get_active_wall().wall_type == ROW) 
       {
+      	 // Since Wall is ROW, wall is moving either NORTH or SOUTH
          player_at_border = (get_active_wall().direction == NORTH) ? move_north(): move_south();
       }
-      else
+      else // Since Wall is COLUMN, wall is moving either EAST or WEST
       {
          player_at_border = (get_active_wall().direction == EAST) ? move_east(): move_west();
       }
-      toggle_wall(1);           // Re-display the part of wall which collided with player
-      // (which disappears after player is moved)
+      
+      /* Re-display the part of wall which collided with player  */
+      /*   (which disappears after player is moved)              */
+      toggle_wall(1);  
+                       
       if (player_at_border)
       {
+      	 // Kills player if pushed beyond the wall
          decrease_lives();
       }
       break;
@@ -236,18 +266,26 @@ void gamemode_collsion_process(void)
 }
 
 
+/*  Checks to see if a "collision" has aoccured
+ *  @brief: As mentioned, stun was introduced so player doesn't have multiple loss of lives from single collision
+ *		Function only returns true if collsion & not stunned player cannot move whilst stunned
+ *		(stun is removed after wall moves away, prevent player moving into another part of wall) 
+ */
 void check_collisions()
 {
    if (get_game_state())
    {
-      if (collision_dectection() & !get_stun_condition())
+      if (collision_dectection() & !get_stun_condition()) // If collision and not stunned
       {
-         gamemode_collsion_process();
+         gamemode_collsion_process(); // What occurs during a collision
       }
    }
 }
 
 
+/*  Outlines process of a game_ending (text display, music played)
+ *  @brief: Displays SCORE and plays ending music END_GAME_MUSIC
+ */
 void game_outro(void)
 {
    char end_message[END_PROMPT_LEN + SIZE_OF_UINT8] = END_PROMPT;
@@ -260,13 +298,13 @@ void game_outro(void)
 
 /*  Checks whether wall has collided with player
  *  @brief: For a collsion to occur, player and ACTIVE_WALL must have
- *                      same position AND player must not be inline with hole.
- *          Used to end the game.
+ *          same position AND player must not be inline with hole.
+ *          USed in function check_collisions()
  */
 bool collision_dectection()
 {
-   Position_t character_position = get_character_pos();
-   Wall_t     wall = get_active_wall();
+   PlayerInfoStruct character_position = get_character_pos();
+   WallStruct     wall = get_active_wall();
 
    // Checks whether player is inline with hole in the wall
    uint8_t player_bitmap       = (wall.wall_type == ROW) ? BIT(character_position.x): BIT(character_position.y);
@@ -276,5 +314,5 @@ bool collision_dectection()
    uint8_t player_index     = (wall.wall_type == ROW) ? character_position.y: character_position.x;
    bool    is_same_position = player_index == wall.pos;
 
-   return(potential_collision & is_same_position);
+   return (potential_collision & is_same_position);
 }
