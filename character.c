@@ -3,19 +3,23 @@
  *  @date   3 Oct 2021
  *  @brief  Character profile
  */
+ 
 #include "character.h"
 #include "display.h"
 #include "navswitch.h"
 
-// Character position
-Position_t CHARACTER_POS;
-bool       character_stun = false;
+// Character struct
+PlayerInfoStruct CHARACTER_POS;
+bool CHARACTER_STUN = false;
 
 
-// Display character at default coordinates
+/* Initialisation for character module
+ * @param life_count: creates player with respective number of lives
+ * @brief: Character creation, spawns character at default coordinates 
+*/
 void character_init(uint8_t life_count)
 {
-   CHARACTER_POS = (Position_t){
+   CHARACTER_POS = (PlayerInfoStruct){
       .x = DEFAULT_X, .y = DEFAULT_Y, .lives = life_count
    };
    display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
@@ -27,35 +31,40 @@ void character_init(uint8_t life_count)
 }
 
 
-//Turn off character
+/* Sets the character display state to false
+*/
 void character_disable()
 {
    display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
 }
 
 
-// Implements stun attribute in the game (after wall collsion)
+/*  Changes the stun state of the player
+ *  @param stun_set: bool variable to which CHARACTER_STUN is set
+ */
 void toggle_stun(bool stun_set)
 {
-   character_stun = stun_set;
+   CHARACTER_STUN = stun_set;
 }
 
-
+/* Returns the stun state of the player
+*/
 bool get_stun_condition()
 {
-   return character_stun;
+   return CHARACTER_STUN;
 }
 
 
-/** Return current character coordinates
- *  @return Position_t with .x .y values */
-Position_t get_character_pos(void)
+/* Return current character coordinates
+ *  @return PlayerInfoStruct with coordinates and number of lives 
+ */
+PlayerInfoStruct get_character_pos(void)
 {
    return CHARACTER_POS;
 }
 
 
-/** Move character 1 unit west*/
+/* Move character 1 unit west*/
 bool move_west()
 {
    if ((WEST_CHARACTER_BOUNDARY < CHARACTER_POS.x) && !display_pixel_get(CHARACTER_POS.x - 1, CHARACTER_POS.y))
@@ -72,7 +81,7 @@ bool move_west()
 }
 
 
-/** Move character 1 unit east*/
+/* Move character 1 unit east*/
 bool move_east()
 {
    if ((EAST_CHARACTER_BOUNDARY > CHARACTER_POS.x) && !display_pixel_get(CHARACTER_POS.x + 1, CHARACTER_POS.y))
@@ -89,7 +98,7 @@ bool move_east()
 }
 
 
-/** Move character 1 unit north*/
+/* Move character 1 unit north*/
 bool move_north()
 {
    if ((NORTH_CHARACTER_BOUNDARY < CHARACTER_POS.y) && !display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y - 1))
@@ -106,7 +115,7 @@ bool move_north()
 }
 
 
-/** Move character 1 unit south*/
+/* Move character 1 unit south*/
 bool move_south()
 {
    if ((SOUTH_CHARACTER_BOUNDARY > CHARACTER_POS.y) && !display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y + 1))
@@ -121,19 +130,21 @@ bool move_south()
 }
 
 
-/** Poll navswitch input and move character
- *  in corresponding direction*/
+/* Poll navswitch input and move character
+*  @brief: Doesn't allow movement is player is stunned 
+*/
 void character_update()
 {
-   navswitch_update();
+   navswitch_update(); // Update navswitch input
 
-   //Restore character state if passed by wall
+   //Restores character state if passed by wall
    if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
    {
       display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
    }
-   //Move character in direction of navswitch input
-   if (!character_stun)
+   // Move character in direction of navswitch input
+   // Doesn't allow movement if character is stunned
+   if (!CHARACTER_STUN)
    {
       if (navswitch_push_event_p(NAVSWITCH_NORTH))
       {
@@ -155,7 +166,9 @@ void character_update()
 }
 
 
-/* Returns high if CHARACTER_POS has zero lives */
+/* Reduces player lives by 1
+*  @return: returns true is player lives is reduced to 0
+*/
 bool decrease_player_lives()
 {
    CHARACTER_POS.lives--;
