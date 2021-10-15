@@ -55,7 +55,7 @@ char *GAMEMODE_STRINGS[] =
 };
 
 
-/*  Initialize game manager, LED and starts game menu 
+/*  Initialize game manager, LED and starts game menu
  *  @param message_rate: text scroll speed of MENU texts
  *  @brief: using 3x5 font, displays " SELECT GAME MODE "
  */
@@ -149,18 +149,18 @@ void game_start()
    default:
       player_lives = 3;   // Game will default to three_lives mode (if index > 3)
    }
- 
+
    tinygl_clear();                // Clear display
    character_init(player_lives);  // Initialise character module (with given lives)
    wall_init(WALL_RANDOM_SEED);   // Initialises wall module with random seed
 
-   sound_play(GAME_MUSIC);        // PLays game music 
+   sound_play(GAME_MUSIC);        // PLays game music
    SCORE       = 0;               // Reset gamescore (from previous games)
    ACTIVE_GAME = true;            // game is started so ACTIVE_GAME is true
 }
 
 
-/*  Updates game states 
+/*  Updates game states
  *  @brief: button only pauses game if the game is active
  *          MENU_TONE is played during paused state
  */
@@ -204,13 +204,13 @@ void game_state_update()
 }
 
 
-/*  Decreases player lives 
- *  @brief: decrease_player_lives() decreases lives and return true is lives = 0
+/*  Decreases player lives
+ *  @brief: decrease_character_lives() decreases lives and return true is lives = 0
  *          if lives = 0, game enters ending state
  */
 void decrease_lives(void)
 {
-   if (decrease_player_lives())
+   if (decrease_character_lives())
    {
       ACTIVE_GAME = false;
       toggle_wall(false);
@@ -221,7 +221,7 @@ void decrease_lives(void)
 
 
 
-/*  Outlines the outcome of a collsion (decided by each game_mode) 
+/*  Outlines the outcome of a collsion (decided by each game_mode)
  *  @brief: HARDMODE    = dcreases lives (only 1 life so instant death)
  *          THREE_LIVES = dcreases lives (from which player has 3)
  *          WALL_PUSH   = "pushes" by moving player in direction of wall momvement
@@ -242,7 +242,7 @@ void gamemode_collsion_process(void)
 
    case WALL_PUSH:
       // Will move character in direction of wall movement)
-      if (get_active_wall().wall_type == ROW) 
+      if (get_active_wall().wall_type == ROW)
       {
       	 // Since Wall is ROW, wall is moving either NORTH or SOUTH
          player_at_border = (get_active_wall().direction == NORTH) ? move_north(): move_south();
@@ -251,11 +251,11 @@ void gamemode_collsion_process(void)
       {
          player_at_border = (get_active_wall().direction == EAST) ? move_east(): move_west();
       }
-      
+
       /* Re-display the part of wall which collided with player  */
       /*   (which disappears after player is moved)              */
-      toggle_wall(1);  
-                       
+      toggle_wall(1);
+
       if (player_at_border)
       {
       	 // Kills player if pushed beyond the wall
@@ -269,7 +269,7 @@ void gamemode_collsion_process(void)
 /*  Checks to see if a "collision" has aoccured
  *  @brief: As mentioned, stun was introduced so player doesn't have multiple loss of lives from single collision
  *		Function only returns true if collsion & not stunned player cannot move whilst stunned
- *		(stun is removed after wall moves away, prevent player moving into another part of wall) 
+ *		(stun is removed after wall moves away, prevent player moving into another part of wall)
  */
 void check_collisions()
 {
@@ -303,15 +303,15 @@ void game_outro(void)
  */
 bool collision_dectection()
 {
-   PlayerInfoStruct character_position = get_character_pos();
+   CharacterInfoStruct character_info = get_character_info();
    WallStruct     wall = get_active_wall();
 
    // Checks whether player is inline with hole in the wall
-   uint8_t player_bitmap       = (wall.wall_type == ROW) ? BIT(character_position.x): BIT(character_position.y);
+   uint8_t player_bitmap       = (wall.wall_type == ROW) ? BIT(character_info.x): BIT(character_info.y);
    bool    potential_collision = (wall.bit_data & player_bitmap) != 0;
 
    // Checks whether the player is on the ACTIVE_WALL position
-   uint8_t player_index     = (wall.wall_type == ROW) ? character_position.y: character_position.x;
+   uint8_t player_index     = (wall.wall_type == ROW) ? character_info.y: character_info.x;
    bool    is_same_position = player_index == wall.pos;
 
    return (potential_collision & is_same_position);

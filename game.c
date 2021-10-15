@@ -1,27 +1,24 @@
 /** @file   game.c
  *  @author Lucas Trickett, Harrison Tyson
- *  @date   10 Oct 2021
+ *  @date   15 Oct 2021
  *  @brief  Main task control
  */
 
 #include "system.h"
-#include "task.h"
 #include "display.h"
+#include "tinygl.h"
+#include "task.h"
 #include "character.h"
 #include "wall.h"
 #include "game_manager.h"
-#include "tinygl.h"
 #include "sound.h"
 
 //Frequency of task execution in hz
 #define DISPLAY_UPDATE_RATE            300
 #define INPUT_UPDATE_RATE              20
-#define MESSAGE_RATE                   20  // Tinygl text scroll speed
-
-//Sound rate constants
 #define TWEETER_TASK_RATE              5000
 #define MELODY_TASK_RATE               100
-#define MELODY_BPM_DEFAULT             200
+#define MESSAGE_RATE                   20  // Tinygl text scroll speed
 
 //Difficulty constants
 #define WALL_SPEED_INCREMENT_RATE      20  // Delay before speed increment in seconds
@@ -30,115 +27,132 @@
 
 #define WALL_TASK_INDEX                4   //Index of the wall task object within tasks array
 
-static uint8_t WALL_SPEED = DEFAULT_SPEED; // Default wall speed (walls/second)
+static uint8_t wall_speed = DEFAULT_SPEED; // Default wall speed (walls/second)
 
-// Update display
+
+/* Update LED Matrix display
+ *  @param unused void pointer passed by task scheduler */
 static void display_task(__unused__ void *data)
 {
-   tinygl_update();  //Update scrolling text
+	tinygl_update(); //Update scrolling text
 }
 
 
-// Update walls - move existing wall or create new wall and increment score
+/*  Wall update task moves existing wall or
+ *  creates new wall and increments score
+ *  @param unused void pointer passed by task scheduler */
 static void wall_task(__unused__ void *data)
 {
-   if (get_game_state() & !get_pause_state())
-   {
-      if (get_active_wall().wall_type == OUT_OF_BOUNDS)
-      {
-         wall_create();
-         increment_score();
-      }
-      else
-      {
-         move_wall();
+	if (get_game_state() & !get_pause_state())
+	{
+		if (get_active_wall().wall_type == OUT_OF_BOUNDS)
+		{
+			wall_create();
+			increment_score();
+		}
+		else
+		{
+			move_wall();
+			toggle_stun(0); // Reset stun condition when wall moves over character
+		}
 
-         // Allows player to move after a potential collision
-         toggle_stun(0);
-      }
-      check_collisions();
-   }
+		check_collisions();
+	}
 }
 
 
-// Poll input and update character position
+/*  Character movement input polling
+ *  @param unused void pointer passed by task scheduler */
 static void character_task(__unused__ void *data)
 {
-   if (get_game_state() & !get_pause_state())
-   {
-      character_update();
-   }
+	if (get_game_state() & !get_pause_state())
+	{
+		character_update();
+	}
 }
 
 
-// Poll input to start the game
+/*  Start/Resume game and reset difficulty on restart
+ *  @param task_t pointer of task to reset period*/
 static void start_game_task(void *data)
 {
-   task_t *task = data;
+	task_t *task = data;
 
-   if (!get_game_state())
-   {
-      //Reset difficulty
-      WALL_SPEED   = DEFAULT_SPEED;
-      task->period = TASK_RATE / WALL_SPEED;
-      game_state_update();
-   }
-   check_pause_button();
+	if (!get_game_state())
+	{
+		// Reset difficulty
+		wall_speed   = DEFAULT_SPEED;
+		task->period = TASK_RATE / wall_speed;
+		game_state_update();
+	}
+
+	check_pause_button();
 }
 
 
-// Increase game difficulty by incrementing wall speed
+/*  Wall update task moves existing wall or
+ *  creates new wall and increments score
+ *  @param task_t pointer of task to increase rate*/
 static void difficulty_task(void *data)
 {
-   if (!get_pause_state())
-   {
-      static uint8_t counter = 0;
-      task_t         *task   = data;
+	if (!get_pause_state())
+	{
+		static uint8_t counter = 0; // Tracks number of function calls
+		task_t         *task   = data;
 
-      task->period = TASK_RATE / WALL_SPEED;
-      counter++;
-      if (counter >= WALL_SPEED_INCREMENT_RATE)
-      {
-         WALL_SPEED  += WALL_SPEED_INCREMENT_AMOUNT;
-         task->period = TASK_RATE / WALL_SPEED;
-         counter      = 0;
-      }
-   }
+		task->period = TASK_RATE / wall_speed;
+		counter++;
+
+        // Increases speed after WALL_SPEED_INCREMENT_RATE times the task frequency
+		if (counter >= WALL_SPEED_INCREMENT_RATE)
+		{
+			wall_speed  += WALL_SPEED_INCREMENT_AMOUNT;
+			task->period = TASK_RATE / wall_speed;
+			counter      = 0;
+		}
+	}
 }
 
 
+/*  Tweeter update task to make speaker sound
+ *  @param unused void pointer passed by task scheduler */
 static void tweeter_task(__unused__ void *data)
 {
-   speaker_update();
+	speaker_update();
 }
 
 
+/*  Melody update task to advance current melody
+ *  @param unused void pointer passed by task scheduler */
 static void melody_task(__unused__ void *data)
 {
-   sound_update();
+	sound_update();
 }
 
 
 int main(void)
 {
-   // Module initialization
-   system_init();
-   display_init();
-   tinygl_init(DISPLAY_UPDATE_RATE);
-   game_init(MESSAGE_RATE);
-   sound_init(TWEETER_TASK_RATE, MELODY_TASK_RATE, MELODY_BPM_DEFAULT);
-   // Task definitions
-   task_t tasks[] =
-   {
-      { .func = tweeter_task,    .period = TASK_RATE / TWEETER_TASK_RATE   },
-      { .func = melody_task,     .period = TASK_RATE / MELODY_TASK_RATE    },
-      { .func = display_task,    .period = TASK_RATE / DISPLAY_UPDATE_RATE },
-      { .func = character_task,  .period = TASK_RATE / INPUT_UPDATE_RATE   },
-      { .func = wall_task,       .period = TASK_RATE / WALL_SPEED          },
-      { .func = difficulty_task, .period = TASK_RATE, .data = &(tasks[WALL_TASK_INDEX])},
-      { .func = start_game_task, .period = TASK_RATE / INPUT_UPDATE_RATE, .data = &(tasks[WALL_TASK_INDEX])},
-   };
+	// Module initialization
+	system_init();
+	display_init();
+	tinygl_init(DISPLAY_UPDATE_RATE);
+	game_init(MESSAGE_RATE);
+	sound_init(TWEETER_TASK_RATE, MELODY_TASK_RATE);
 
-   // Run tasks
-   task_schedule(tasks, ARRAY_SIZE(tasks));
+	// Task definitions
+	task_t tasks[] =
+	{
+		{ .func = tweeter_task,    .period = TASK_RATE / TWEETER_TASK_RATE   },
+		{ .func = melody_task,     .period = TASK_RATE / MELODY_TASK_RATE    },
+		{ .func = display_task,    .period = TASK_RATE / DISPLAY_UPDATE_RATE },
+		{ .func = character_task,  .period = TASK_RATE / INPUT_UPDATE_RATE   },
+		{ .func = wall_task,       .period = TASK_RATE / wall_speed          },
+		{ .func = difficulty_task, .period = TASK_RATE, .data = &(tasks[WALL_TASK_INDEX])},
+		{ .func = start_game_task, .period = TASK_RATE / INPUT_UPDATE_RATE, .data = &(tasks[WALL_TASK_INDEX])},
+	};
+
+	// Run tasks
+	task_schedule(tasks, ARRAY_SIZE(tasks));
+
+	return 0;
 }

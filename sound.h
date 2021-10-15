@@ -24,6 +24,6 @@ void beep(void);
 
 
 // Initialize sound drivers
-void sound_init(uint16_t tweeter_task_rate, uint16_t tune_task_rate, uint16_t tune_bpm_rate);
+void sound_init(uint16_t tweeter_task_rate, uint16_t tune_task_rate);
 
 #endif

@@ -4,9 +4,12 @@
 #include "pio.h"
 #include "sound.h"
 
-//Extracted from ../apps/space12.c
+//Tweeter pins
 #define PIEZO1_PIO    PIO_DEFINE(PORT_D, 4)        //Pin 1
 #define PIEZO2_PIO    PIO_DEFINE(PORT_D, 6)        //Pin 3
+
+//Default music speed
+#define MELODY_BPM_DEFAULT             200
 
 // Need to get rid of this magic number = TWEETER_TASK_RATE
 static tweeter_scale_t scale_table[] = TWEETER_SCALE_TABLE(5000);
@@ -57,7 +60,7 @@ void beep() // Single beep used for testing
 
 
 // Initialize sound drivers
-void sound_init(uint16_t tweeter_task_rate, uint16_t tune_task_rate, uint16_t tune_bpm_rate)
+void sound_init(uint16_t tweeter_task_rate, uint16_t tune_task_rate)
 {
    // Speaker object init
    tweeter = tweeter_init(&tweeter_info, tweeter_task_rate, scale_table);
@@ -69,5 +72,5 @@ void sound_init(uint16_t tweeter_task_rate, uint16_t tune_task_rate, uint16_t tu
    // Melody object init
    melody = mmelody_init(&melody_info, tune_task_rate,
                          (mmelody_callback_t)tweeter_note_play, tweeter);
-   mmelody_speed_set(melody, tune_bpm_rate);
+   mmelody_speed_set(melody, MELODY_BPM_DEFAULT);
 }

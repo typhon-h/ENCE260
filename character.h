@@ -9,48 +9,73 @@
 #include "system.h"
 
 //Character movement restrictions
-#define WEST_CHARACTER_BOUNDARY     0 //Column
-#define EAST_CHARACTER_BOUNDARY     4 //Column
-#define NORTH_CHARACTER_BOUNDARY    0 //Row
-#define SOUTH_CHARACTER_BOUNDARY    6 //Row
+#define NORTH_CHARACTER_BOUNDARY    0 // Top Row
+#define EAST_CHARACTER_BOUNDARY     4 // Right Column
+#define SOUTH_CHARACTER_BOUNDARY    6 // Bottom Row
+#define WEST_CHARACTER_BOUNDARY     0 // Left Column
 
 //Default starting coordinates
 #define DEFAULT_X                   2
 #define DEFAULT_Y                   3
 
-// Player information (lives and position)
+
+// Character information (lives and position)
 typedef struct
 {
-   uint8_t x, y;
-   uint8_t lives;
-} PlayerInfoStruct;
+	uint8_t x, y;
+	uint8_t lives;
+	bool    is_stunned;
+} CharacterInfoStruct;
 
-//Create the character at the default starting position
+
+/* Initialisation for character module
+ * @param life_count: creates player with respective number of lives
+ * @brief: Character creation, spawns character at default coordinates
+ */
 void character_init(uint8_t life_count);
 
-// Toggles the stun state of the player
-void toggle_stun(bool stun_set);
 
-// Outputs the current stun state
+/*  Return current character information
+ *  @return CharacterInfoStruct with coordinates and number of lives
+ */
+CharacterInfoStruct get_character_info(void);
+
+
+/*  Returns the stun state of the player
+ *  @return 1 if stunned else 0
+ */
 bool get_stun_condition(void);
 
-//Turn off character
+
+/*  Changes the stun state of the player
+ *  @param stun_set: bool variable to which character_stun is set
+ */
+void toggle_stun(bool stun_set);
+
+
+/* Reduces character lives by 1
+ *  @return: returns 1 if no lives left else 0
+ */
+bool decrease_character_lives(void);
+
+
+/* Turns off character
+ */
 void character_disable(void);
 
-//Return current position of the character
-PlayerInfoStruct get_character_pos(void);
 
-// Move the character in the given direction, restricted by boundary
-// Returns true if character is unable to move (For Push Wall gamemode)
+/*  Move character 1 unit in cardinal direction
+ *  @return 1 if character moving off boundary else 0
+ */
 bool move_west(void);
 bool move_east(void);
 bool move_north(void);
 bool move_south(void);
 
-//Poll navswitch input and update character position
-void character_update(void);
 
-// Reduce player lives by one, returns true if game has ended
-bool decrease_player_lives(void);
+/* Poll navswitch input and move character
+ *  @brief: Doesn't allow movement is player is stunned
+ */
+void character_update(void);
 
 #endif

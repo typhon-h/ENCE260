@@ -3,174 +3,199 @@
  *  @date   3 Oct 2021
  *  @brief  Character profile
  */
- 
+
 #include "character.h"
 #include "display.h"
 #include "navswitch.h"
 
-// Character struct
-PlayerInfoStruct CHARACTER_POS;
-bool CHARACTER_STUN = false;
+// Character properties
+static CharacterInfoStruct character_info;
 
 
 /* Initialisation for character module
  * @param life_count: creates player with respective number of lives
- * @brief: Character creation, spawns character at default coordinates 
-*/
+ * @brief: Character creation, spawns character at default coordinates
+ */
 void character_init(uint8_t life_count)
 {
-   CHARACTER_POS = (PlayerInfoStruct){
-      .x = DEFAULT_X, .y = DEFAULT_Y, .lives = life_count
-   };
-   display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+	character_info = (CharacterInfoStruct){
+		.x = DEFAULT_X, .y = DEFAULT_Y, .lives = life_count
+	};
 
-   if (get_stun_condition())  //Prevent character being stunned on respawn
-   {
-      toggle_stun(false);
-   }
+	display_pixel_set(character_info.x, character_info.y, true);
+
+	if (get_stun_condition())     //Prevent character being stunned on respawn
+	{
+		toggle_stun(false);
+	}
 }
 
 
-/* Sets the character display state to false
-*/
-void character_disable()
+/*  Return current character information
+ *  @return CharacterInfoStruct with coordinates and number of lives
+ */
+CharacterInfoStruct get_character_info(void)
 {
-   display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
+	return character_info;
+}
+
+
+/*  Returns the stun state of the player
+ *  @return 1 if stunned else 0
+ */
+bool get_stun_condition()
+{
+	return character_info.is_stunned;
 }
 
 
 /*  Changes the stun state of the player
- *  @param stun_set: bool variable to which CHARACTER_STUN is set
+ *  @param stun_set: bool variable to which character_stun is set
  */
 void toggle_stun(bool stun_set)
 {
-   CHARACTER_STUN = stun_set;
-}
-
-/* Returns the stun state of the player
-*/
-bool get_stun_condition()
-{
-   return CHARACTER_STUN;
+	character_info.is_stunned = stun_set;
 }
 
 
-/* Return current character coordinates
- *  @return PlayerInfoStruct with coordinates and number of lives 
+/* Reduces character lives by 1
+ *  @return: returns 1 if no lives left else 0
  */
-PlayerInfoStruct get_character_pos(void)
+bool decrease_character_lives()
 {
-   return CHARACTER_POS;
+	character_info.lives--;
+	return(character_info.lives == 0);
 }
 
 
-/* Move character 1 unit west*/
+/* Turns off character
+ */
+void character_disable()
+{
+	display_pixel_set(character_info.x, character_info.y, false);
+}
+
+
+/*  Move character 1 unit west
+ *  @return 1 if character moving off boundary else 0*/
 bool move_west()
 {
-   if ((WEST_CHARACTER_BOUNDARY < CHARACTER_POS.x) && !display_pixel_get(CHARACTER_POS.x - 1, CHARACTER_POS.y))
-   {
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
-      CHARACTER_POS.x -= 1;
-      if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
-      {
-         display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
-      }
-      return 0;
-   }
-   return 1;
+	if ((WEST_CHARACTER_BOUNDARY < character_info.x) && !display_pixel_get(character_info.x - 1, character_info.y))
+	{
+		display_pixel_set(character_info.x, character_info.y, false);
+
+		character_info.x -= 1;
+
+		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
+		{
+			display_pixel_set(character_info.x, character_info.y, true);
+		}
+
+		return 0;
+	}
+
+	return 1;
 }
 
 
-/* Move character 1 unit east*/
+/*  Move character 1 unit east
+ *  @return 1 if character moving off boundary else 0*/
 bool move_east()
 {
-   if ((EAST_CHARACTER_BOUNDARY > CHARACTER_POS.x) && !display_pixel_get(CHARACTER_POS.x + 1, CHARACTER_POS.y))
-   {
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
-      CHARACTER_POS.x += 1;
-      if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
-      {
-         display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
-      }
-      return 0;
-   }
-   return 1;
+	if ((EAST_CHARACTER_BOUNDARY > character_info.x) && !display_pixel_get(character_info.x + 1, character_info.y))
+	{
+		display_pixel_set(character_info.x, character_info.y, false);
+
+		character_info.x += 1;
+
+		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
+		{
+			display_pixel_set(character_info.x, character_info.y, true);
+		}
+
+		return 0;
+	}
+
+	return 1;
 }
 
 
-/* Move character 1 unit north*/
+/*  Move character 1 unit north
+ *  @return 1 if character moving off boundary else 0*/
 bool move_north()
 {
-   if ((NORTH_CHARACTER_BOUNDARY < CHARACTER_POS.y) && !display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y - 1))
-   {
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
-      CHARACTER_POS.y -= 1;
-      if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
-      {
-         display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
-      }
-      return 0;
-   }
-   return 1;
+	if ((NORTH_CHARACTER_BOUNDARY < character_info.y) && !display_pixel_get(character_info.x, character_info.y - 1))
+	{
+		display_pixel_set(character_info.x, character_info.y, false);
+
+		character_info.y -= 1;
+
+		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
+		{
+			display_pixel_set(character_info.x, character_info.y, true);
+		}
+
+		return 0;
+	}
+
+	return 1;
 }
 
 
-/* Move character 1 unit south*/
+/*  Move character 1 unit south
+ *  @return 1 if character moving off boundary else 0*/
 bool move_south()
 {
-   if ((SOUTH_CHARACTER_BOUNDARY > CHARACTER_POS.y) && !display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y + 1))
-   {
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, false);
-      CHARACTER_POS.y += 1;
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
+	if ((SOUTH_CHARACTER_BOUNDARY > character_info.y) && !display_pixel_get(character_info.x, character_info.y + 1))
+	{
+		display_pixel_set(character_info.x, character_info.y, false);
 
-      return 0;
-   }
-   return 1;
+		character_info.y += 1;
+
+		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
+		{
+			display_pixel_set(character_info.x, character_info.y, true);
+		}
+
+		return 0;
+	}
+
+	return 1;
 }
 
 
 /* Poll navswitch input and move character
-*  @brief: Doesn't allow movement is player is stunned 
-*/
+ *  @brief: Doesn't allow movement is player is stunned
+ */
 void character_update()
 {
-   navswitch_update(); // Update navswitch input
+	navswitch_update();     // Update navswitch input
 
-   //Restores character state if passed by wall
-   if (!display_pixel_get(CHARACTER_POS.x, CHARACTER_POS.y))
-   {
-      display_pixel_set(CHARACTER_POS.x, CHARACTER_POS.y, true);
-   }
-   // Move character in direction of navswitch input
-   // Doesn't allow movement if character is stunned
-   if (!CHARACTER_STUN)
-   {
-      if (navswitch_push_event_p(NAVSWITCH_NORTH))
-      {
-         move_north();
-      }
-      else if (navswitch_push_event_p(NAVSWITCH_SOUTH))
-      {
-         move_south();
-      }
-      else if (navswitch_push_event_p(NAVSWITCH_EAST))
-      {
-         move_east();
-      }
-      else if (navswitch_push_event_p(NAVSWITCH_WEST))
-      {
-         move_west();
-      }
-   }
-}
+	//Restores character state if passed by wall
+	if (!display_pixel_get(character_info.x, character_info.y))
+	{
+		display_pixel_set(character_info.x, character_info.y, true);
+	}
 
-
-/* Reduces player lives by 1
-*  @return: returns true is player lives is reduced to 0
-*/
-bool decrease_player_lives()
-{
-   CHARACTER_POS.lives--;
-   return(CHARACTER_POS.lives == 0);
+	// Move character in direction of navswitch input
+	// Doesn't allow movement if character is stunned
+	if (!character_info.is_stunned)
+	{
+		if (navswitch_push_event_p(NAVSWITCH_NORTH))
+		{
+			move_north();
+		}
+		else if (navswitch_push_event_p(NAVSWITCH_SOUTH))
+		{
+			move_south();
+		}
+		else if (navswitch_push_event_p(NAVSWITCH_EAST))
+		{
+			move_east();
+		}
+		else if (navswitch_push_event_p(NAVSWITCH_WEST))
+		{
+			move_west();
+		}
+	}
 }
