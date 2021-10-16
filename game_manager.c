@@ -2,54 +2,46 @@
  *  @author Lucas Trickett, Harrison Tyson
  *  @date   10 Oct 2021
  *  @brief  Controls key game components:
- *          Menus
- *          Various gamemodes
- *          Game Start/Stop
- *          Key events
+ *          Menus and game modes
+ *          Game Start/Stop/Pause
+ *          Key events eg. collision, lives, scoring
  */
 
 #include "system.h"
 #include "game_manager.h"
 #include "character.h"
 #include "wall.h"
+#include "sound.h"
 #include "button.h"
 #include "navswitch.h"
-
 #include "tinygl.h"
 #include "../fonts/font3x5_1.h"
 #include "uint8toa.h"
-
-#include "sound.h"
 #include "led.h"
 
-#define GAME_MODE_PROMPT    " SELECT GAMEMODE "
-#define END_PROMPT          " GAME OVER SCORE:"  //Additional whitespace to insert score
-#define END_PROMPT_LEN      17
-#define SIZE_OF_UINT8       8                    //For buffer on end message for score
 
-#define MENU_TONE           "A"
-
-char GAME_MUSIC[] =   //Music to loop during gameplay
+static char GAME_MUSIC[] =   // Music to loop during gameplay
 {
 #include "sounds/megalovania.mmel"
-         " :"           // Loop infinitely
+         " :"           // Loop indefinitely
 };
 
-char END_GAME_MUSIC[] = //End menu music
+static char END_GAME_MUSIC[] = // End menu music
 {
 #include "sounds/rick_roll.mmel"
          " :" // Loop indefinitely
 };
 
 
-GAMESTATES_t  ACTIVE_GAME      = false;
+// Game Constants
+static GAMESTATES_t  active_game      = SELECTION_STATE;
+static uint8_t score            = 0;
+static uint8_t game_mode_index  = 0;
+static bool    pause_status     = false;
+uint8_t wall_random_seed = 0;
 
-uint8_t SCORE            = 0;        // has a max of 255
-uint8_t GAME_MODE_index  = 0;
-uint8_t WALL_RANDOM_SEED = 0;
-bool    PAUSE_STATUS     = false;
 
-char *GAMEMODE_STRINGS[] =
+char *GAMEMODE_STRINGS[] = // Gamemode prompts
 {
    HARD_MODE_TEXT,
    THREE_LIVES_TEXT,
@@ -74,31 +66,23 @@ void game_init(uint8_t message_rate)
 }
 
 
-/*  Return current state of game, increments WALL_RANDOM_SEED
+/*  Return current state of game, increments wall_random_seed
  *  @brief: number of calls to function (during menus) depends of time spent on menus
  *          ensures that random seed for wall_init() is always different
  */
 bool get_game_state()
 {
-   WALL_RANDOM_SEED++; // Increments global variable WALL_RANDOM_SEED
-   return (ACTIVE_GAME == GAME_PLAY_STATE);
+   wall_random_seed++; // Increments variable wall_random_seed
+   return (active_game == GAME_PLAY_STATE);
 }
 
 
 /*  Returns the pause state of the game
+ *  @return true if the game is paused else false
  */
 bool get_pause_state()
 {
-   return PAUSE_STATUS;
-}
-
-
-/*  Increments game score
- *  @brief: as there is a single moving wall, this is called ervery time the wall resets
- */
-void increment_score()
-{
-   SCORE++;
+   return pause_status;
 }
 
 
@@ -106,14 +90,14 @@ void increment_score()
  *  @brief: button only pauses the game if it's active.
  *          MENU_TONE is played during paused state
  */
-void check_pause_button(void)
+void check_pause_button()
 {
    button_update(); // Update button input
-   if (button_push_event_p(0) & ACTIVE_GAME) // if button is pressed AND game is active
+   if (button_push_event_p(0) & active_game) // if button is pressed AND game is active
    {
-      PAUSE_STATUS = !PAUSE_STATUS; // Toggles pause state each press
-      led_set(LED1, PAUSE_STATUS);  // If paused, LED lights up
-      if (PAUSE_STATUS)
+      pause_status = !pause_status; // Toggles pause state each press
+      led_set(LED1, pause_status);  // If paused, LED lights up
+      if (pause_status)
       {
          sound_play(MENU_TONE);     // If paused, MENU_TONE is played
       }
@@ -125,6 +109,50 @@ void check_pause_button(void)
 }
 
 
+/*  Updates game states
+ *  @brief: checks navswitch to scroll through menu (if in menu).
+ *          checks for button push to either redo game or select gamemode.
+ */
+void game_state_update()
+{
+	navswitch_update();
+	button_update();
+
+	switch (active_game)
+	{
+	case SELECTION_STATE:
+		if (navswitch_push_event_p(NAVSWITCH_PUSH)) // Change game mode
+		{
+      		tinygl_clear();
+      		game_mode_index = (game_mode_index + 1) % DIFFERENT_GAMEMODES;   // Update GAMEMODE_index (currently selected)
+      		tinygl_text(GAMEMODE_STRINGS[game_mode_index]);                  // Display different gamemode text
+            sound_play(MENU_TONE);
+		}
+
+		if (button_push_event_p(0)) // Start game
+		{
+       		active_game = GAME_PLAY_STATE;
+       		game_start();
+		}
+		break;
+
+	case GAME_END_STATE: // Return to menu
+		if (button_push_event_p(0))
+		{
+	    	tinygl_clear();
+         	tinygl_text(GAME_MODE_PROMPT);
+          	sound_play(MENU_TONE);
+          	active_game = SELECTION_STATE;
+		}
+
+		break;
+
+    case GAME_PLAY_STATE: // Buttons disabled
+    default:
+        break;
+	}
+}
+
 
 /*  Initialize game components when starting
  *  @brief: gives player lives depending on game mode
@@ -134,7 +162,7 @@ void game_start()
 {
    uint8_t player_lives;
 
-   switch ( (GAMEMODES_t)GAME_MODE_index)
+   switch ( (GAMEMODES_t)game_mode_index) // Set player lives based on game mode
    {
    case THREE_LIVES:
       player_lives = 3;       // Can collide with wall up to 3 times
@@ -154,83 +182,59 @@ void game_start()
 
    tinygl_clear();                // Clear display
    character_init(player_lives);  // Initialise character module (with given lives)
-   wall_init(WALL_RANDOM_SEED);   // Initialises wall module with random seed
+   wall_init(wall_random_seed);   // Initialises wall module with random seed
 
-   sound_play(GAME_MUSIC);        // PLays game music
-   SCORE       = 0;               // Reset gamescore (from previous games)
-   ACTIVE_GAME = true;            // game is started so ACTIVE_GAME is true
+   sound_play(GAME_MUSIC);        // Plays game music
+   score       = 0;               // Reset gamescore (from previous game)
+   active_game = GAME_PLAY_STATE;            // game is started so playing state
 }
 
 
-/*  Updates game states
- *  @brief: checks navswitch to scroll through menu (if in menu).
- *          checks for button push to either redo game or select gamemode.
+/*  Outlines process of a game_ending (text display, music played)
+ *  @brief: Displays score and plays ending music END_GAME_MUSIC
  */
-void game_state_update()
+void game_outro()
 {
-	navswitch_update();
-	button_update(); // Update button input
+   char end_message[END_PROMPT_LEN + SIZE_OF_UINT8] = END_PROMPT;
 
-	switch (ACTIVE_GAME)
-	{
-	case SELECTION_STATE:
-		if (navswitch_push_event_p(NAVSWITCH_PUSH))
-		{
-      		tinygl_clear();
-      		GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;   // Update GAMEMODE_index (currently selected)
-      		tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);                  // Display different gamemode text
-            sound_play(MENU_TONE);
-		}
-		if (button_push_event_p(0))
-		{
-       		ACTIVE_GAME = GAME_PLAY_STATE;
-       		game_start();
-		}
-		break;
-
-	case GAME_PLAY_STATE:
-		break;
-
-	case GAME_END_STATE:
-		if (button_push_event_p(0))
-		{
-	    	tinygl_clear();
-         	tinygl_text(GAME_MODE_PROMPT);
-          	sound_play(MENU_TONE);
-          	ACTIVE_GAME = SELECTION_STATE;
-		}
-		break;
-	}
+   uint8toa(score, end_message + END_PROMPT_LEN, false);
+   tinygl_text(end_message);
+   sound_play(END_GAME_MUSIC);
 }
 
 
-/*  Decreases player lives
- *  @brief: decrease_character_lives() decreases lives and return true is lives = 0
- *          if lives = 0, game enters ending state
+/*  Checks whether wall has collided with player
+ *  @brief: For a collsion to occur, player and ACTIVE_WALL must have
+ *          same position AND player must not be inline with hole.
+ *          Used in function check_collisions()
  */
-void decrease_lives(void)
+static bool collision_dectection(void)
 {
-   if (decrease_character_lives())
-   {
-      ACTIVE_GAME = GAME_END_STATE;
-      toggle_wall(false);
-      character_disable();
-      game_outro();
-   }
-}
+   CharacterInfoStruct character_info = get_character_info();
+   WallStruct     wall = get_active_wall();
 
+   // Checks whether player is inline with hole in the wall
+   uint8_t player_bitmap       = (wall.wall_type == ROW) ? BIT(character_info.x): BIT(character_info.y);
+   bool    potential_collision = (wall.bit_data & player_bitmap) != 0;
+
+   // Checks whether the player is on the ACTIVE_WALL position
+   uint8_t player_index     = (wall.wall_type == ROW) ? character_info.y: character_info.x;
+   bool    is_same_position = player_index == wall.pos;
+
+   return (potential_collision & is_same_position);
+}
 
 
 /*  Outlines the process of a collsion (decided by each gamemode)
  *  @brief:    HARDMODE = dcreases lives (only 1 life so instant death)
- *          THREE_LIVES = dcreases lives (from which player has 3)
- *            WALL_PUSH = "pushes" by moving player in direction of wall momvement
+ *             THREE_LIVES = dcreases lives (from which player has 3)
+ *             WALL_PUSH = "pushes" by moving player in direction of wall momvement
  */
-void gamemode_collsion_process(void)
+static void gamemode_collsion_process(void)
 {
    bool player_at_border; // boolean describing if player is pushed beyond border
 
-   switch ((GAMEMODES_t)GAME_MODE_index)
+   switch ((GAMEMODES_t)game_mode_index)
    {
    case HARD_MODE:
    case THREE_LIVES:
@@ -266,7 +270,7 @@ void gamemode_collsion_process(void)
 }
 
 
-/*  Checks to see if a "collision" has aoccured
+/*  Checks to see if a "collision" has occured
  *  @brief: As mentioned, stun was introduced so player doesn't have multiple loss of lives from single collision
  *		Function only returns true if collsion & not stunned player cannot move whilst stunned
  *		(stun is removed after wall moves away, prevent player moving into another part of wall)
@@ -283,36 +287,27 @@ void check_collisions()
 }
 
 
-/*  Outlines process of a game_ending (text display, music played)
- *  @brief: Displays SCORE and plays ending music END_GAME_MUSIC
- */
-void game_outro(void)
-{
-   char end_message[END_PROMPT_LEN + SIZE_OF_UINT8] = END_PROMPT;
 
-   uint8toa(SCORE, end_message + END_PROMPT_LEN, false);
-   tinygl_text(end_message);
-   sound_play(END_GAME_MUSIC);
+/*  Decreases player lives
+ *  @brief: decrease_character_lives() decreases lives and return true is lives = 0
+ *          if lives = 0, game enters ending state
+ */
+void decrease_lives()
+{
+   if (decrease_character_lives())
+   {
+      active_game = GAME_END_STATE;
+      toggle_wall(false);
+      character_disable();
+      game_outro();
+   }
 }
 
 
-/*  Checks whether wall has collided with player
- *  @brief: For a collsion to occur, player and ACTIVE_WALL must have
- *          same position AND player must not be inline with hole.
- *          USed in function check_collisions()
+/*  Increments game score
+ *  @brief: as there is a single moving wall, this is called ervery time the wall resets
  */
-bool collision_dectection()
+void increment_score()
 {
-   CharacterInfoStruct character_info = get_character_info();
-   WallStruct     wall = get_active_wall();
-
-   // Checks whether player is inline with hole in the wall
-   uint8_t player_bitmap       = (wall.wall_type == ROW) ? BIT(character_info.x): BIT(character_info.y);
-   bool    potential_collision = (wall.bit_data & player_bitmap) != 0;
-
-   // Checks whether the player is on the ACTIVE_WALL position
-   uint8_t player_index     = (wall.wall_type == ROW) ? character_info.y: character_info.x;
-   bool    is_same_position = player_index == wall.pos;
-
-   return (potential_collision & is_same_position);
+   score++;
 }
