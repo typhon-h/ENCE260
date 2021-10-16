@@ -34,7 +34,7 @@ static char END_GAME_MUSIC[] = // End menu music
 
 
 // Game Constants
-static GAMESTATES_t  active_game      = SELECTION_STATE;
+static GAMESTATES_t active_game = MENU_STATE;
 static uint8_t score            = 0;
 static uint8_t game_mode_index  = 0;
 static bool    pause_status     = false;
@@ -120,7 +120,19 @@ void game_state_update()
 
 	switch (active_game)
 	{
+	case MENU_STATE: 
+		// If any input, gamemode is displayed and game state if SELECTION
+		if (navswitch_push_event_p(NAVSWITCH_PUSH) | button_push_event_p(0)) 
+		{
+            sound_play(MENU_TONE);
+			active_game = SELECTION_STATE;
+      		tinygl_clear();
+			tinygl_text(GAMEMODE_STRINGS[game_mode_index]);
+		}
+		break;
+
 	case SELECTION_STATE:
+	
 		if (navswitch_push_event_p(NAVSWITCH_PUSH)) // Change game mode
 		{
       		tinygl_clear();
@@ -142,7 +154,7 @@ void game_state_update()
 	    	tinygl_clear();
          	tinygl_text(GAME_MODE_PROMPT);
           	sound_play(MENU_TONE);
-          	active_game = SELECTION_STATE;
+          	active_game = MENU_STATE;
 		}
 
 		break;
@@ -205,7 +217,7 @@ void game_outro()
 
 /*  Checks whether wall has collided with player
  *  @brief: For a collsion to occur, player and ACTIVE_WALL must have
- *          same position AND player must not be inline with hole.
+ *          same position AND player must overlap with wall.
  *          Used in function check_collisions()
  */
 static bool collision_dectection(void)
@@ -213,11 +225,13 @@ static bool collision_dectection(void)
    CharacterInfoStruct character_info = get_character_info();
    WallStruct     wall = get_active_wall();
 
-   // Checks whether player is inline with hole in the wall
+   // Checks whether player overlaps the wall, by creating bitmap of character (e.g. 00000100)
+   // If (character bitmap) & (wall bitmap) is not zero, then player overlaps with wall_bitmap
    uint8_t player_bitmap       = (wall.wall_type == ROW) ? BIT(character_info.x): BIT(character_info.y);
    bool    potential_collision = (wall.bit_data & player_bitmap) != 0;
 
-   // Checks whether the player is on the ACTIVE_WALL position
+   // Checks whether the player is inline with the ACTIVE_WALL position
+   // If ROW wall_type, then wall position is compared to the characters y coord, else x coord
    uint8_t player_index     = (wall.wall_type == ROW) ? character_info.y: character_info.x;
    bool    is_same_position = player_index == wall.pos;
 
