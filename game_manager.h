@@ -38,9 +38,10 @@ typedef enum
 // Enum containing different game states
 typedef enum
 {
-	SELECTION_STATE,             // Menu state
-	GAME_PLAY_STATE,             // Actual gameplay state
-	GAME_END_STATE               // Game ending
+	MENU_STATE,              // Adding so push button doesnt select gamemode without title
+	SELECTION_STATE,         // Menu state
+	GAME_PLAY_STATE,         // Actual gameplay state
+	GAME_END_STATE           // Game ending
 } GAMESTATES_t;
 
 
