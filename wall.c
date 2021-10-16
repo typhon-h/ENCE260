@@ -178,8 +178,8 @@ void move_wall()
 	// Toggle wall display state to off before moving it
 	toggle_wall(false);
 
-	// NORTH/WEST are positive increments SOUTH/WEST are negative
-	active_wall.pos += (active_wall.direction == NORTH || active_wall.direction == WEST) ? STEP_SIZE: -STEP_SIZE;
+	// SOUTH/EAST are positive increments NORTH/WEST are negative
+	active_wall.pos += (active_wall.direction == SOUTH || active_wall.direction == EAST) ? STEP_SIZE: -STEP_SIZE;
 
 	// Positions are unsigned, thus only one boundary check is needed
 	// (as for negative moving directions pos = 0 -> 255, = above boundary)
