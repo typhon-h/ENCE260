@@ -7,40 +7,39 @@ Descr:  Outlines Game process and design
 Game title: "Hole in the Wall"
 
 Description: "Hole in the Wall" is a game in which the player (represented by a single moveable dot on the screen) 
-			 has to dodge an unending series of walls which travel across the display at random directions.
-			 Each wall will have a hole within it, the size of this hole varies between 1 and 3 and is positioned randomly along 
-			 the wall.
+             has to dodge an unending series of walls which travel across the display at random directions.
+             Each wall will have a hole within it, the size of this hole varies between 1 and 3 and is positioned randomly along 
+             the wall.
 			 
-			 There are 3 various gamemodes to choose from; "Push Wall", "Three Lives" or "Hardmode":
+             There are 3 various gamemodes to choose from; "Push Wall", "Three Lives" or "Hardmode":
 
 			 	  
-			 	  Three Lives - As the name suggests, the player begins the game with 3 lives. A life is lost for each time the 
-			 	  				player collides with the wall. Game ends after 3 collisions 
-			 	  				(note: collision is consisder wall moving into player, player can still move adjacent to wall)
+                  Three Lives - As the name suggests, the player begins the game with 3 lives. A life is lost for each time the 
+                                player collides with the wall. Game ends after 3 collisions 
+                                (note: collision is consisder wall moving into player, player can still move adjacent to wall)
 			 	  
-			 	  Hardmode - Very much the same as "Three Lives", except the player only starts off with a single life, game ends 
+                  Hardmode - Very much the same as "Three Lives", except the player only starts off with a single life, game ends 
 			 	  			 after just a single collision
 			 
-			 	  Push Wall - Has the most resemblance to the game in which this is based off, the moving walls simply "pushes" 
-			 	  			  the character as the wall sweeps across the display. Game ends when player is pushed off the screen.			 	  				
+                  Push Wall - Has the most resemblance to the game in which this is based off, the moving walls simply "pushes" 
+                              the character as the wall sweeps across the display. Game ends when player is pushed off the screen.			 	  				
 			 	  			  
-			 PLayer can choose prefered gamemode at menu screen at the beginning.
-			 There is only a single wall on the display at any given moment, for each of the walls cleared the player gains a 
-			 single point. 
+             PLayer can choose prefered gamemode at menu screen at the beginning.
+             There is only a single wall on the display at any given moment, for each of the walls cleared the player gains a 
+             single point. 
 			 
-			 As time progresses, the speed of these walls increases (progressively getting more difficult).
-			 
+             As time progresses, the speed of these walls increases (progressively getting more difficult).
 			 
 			  
 
 How to Play: - Upon running 'make program' you are greeted with the display prompt "Select Gamemode".
-			   Pressing down either the navswitch or button directs you to various gamemodes (as specified 
-			   above), pressing down the navswitch allows you to scroll from one gamemode to the next. Once
+               Pressing down either the navswitch or button directs you to various gamemodes (as specified 
+               above), pressing down the navswitch allows you to scroll from one gamemode to the next. Once
 			   at a gamemode press the button to select it and initiate the game.
-			 - Game descriptions are stated above, player is controlled by the navswitch direction inputs. Game 
-			   continues until player death (once again, specified above)
-			 - You are then greeted with "Game Over", along with your score. 
-			   To return to the initial game menu (to try another gamemode), press down the button
+             - Game descriptions are stated above, player is controlled by the navswitch direction inputs. Game 
+               continues until player death (once again, specified above)
+             - You are then greeted with "Game Over", along with your score. 
+               To return to the initial game menu (to try another gamemode), press down the button
 
 
 
