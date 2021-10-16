@@ -76,91 +76,91 @@ void character_disable()
 }
 
 
-/*  Move character 1 unit west
- *  @return 1 if character moving off boundary else 0*/
+/*  Move character STEP_SIZE unit west
+ *  @return true if character moving off boundary else false*/
 bool move_west()
 {
-	if ((WEST_CHARACTER_BOUNDARY < character_info.x) && !display_pixel_get(character_info.x - 1, character_info.y))
+	if ((WEST_CHARACTER_BOUNDARY < character_info.x) && !display_pixel_get(character_info.x - STEP_SIZE, character_info.y))
 	{
 		display_pixel_set(character_info.x, character_info.y, false);
 
-		character_info.x -= 1;
+		character_info.x -= STEP_SIZE;
 
 		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
 		{
 			display_pixel_set(character_info.x, character_info.y, true);
 		}
 
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 
-/*  Move character 1 unit east
- *  @return 1 if character moving off boundary else 0*/
+/*  Move character STEP_SIZE unit east
+ *  @return true if character moving off boundary else false*/
 bool move_east()
 {
-	if ((EAST_CHARACTER_BOUNDARY > character_info.x) && !display_pixel_get(character_info.x + 1, character_info.y))
+	if ((EAST_CHARACTER_BOUNDARY > character_info.x) && !display_pixel_get(character_info.x + STEP_SIZE, character_info.y))
 	{
 		display_pixel_set(character_info.x, character_info.y, false);
 
-		character_info.x += 1;
+		character_info.x += STEP_SIZE;
 
 		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
 		{
 			display_pixel_set(character_info.x, character_info.y, true);
 		}
 
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 
-/*  Move character 1 unit north
- *  @return 1 if character moving off boundary else 0*/
+/*  Move character STEP_SIZE unit north
+ *  @return true if character moving off boundary else false*/
 bool move_north()
 {
-	if ((NORTH_CHARACTER_BOUNDARY < character_info.y) && !display_pixel_get(character_info.x, character_info.y - 1))
+	if ((NORTH_CHARACTER_BOUNDARY < character_info.y) && !display_pixel_get(character_info.x, character_info.y - STEP_SIZE))
 	{
 		display_pixel_set(character_info.x, character_info.y, false);
 
-		character_info.y -= 1;
+		character_info.y -= STEP_SIZE;
 
 		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
 		{
 			display_pixel_set(character_info.x, character_info.y, true);
 		}
 
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 
-/*  Move character 1 unit south
- *  @return 1 if character moving off boundary else 0*/
+/*  Move character STEP_SIZE unit south
+ *  @return true if character moving off boundary else false*/
 bool move_south()
 {
-	if ((SOUTH_CHARACTER_BOUNDARY > character_info.y) && !display_pixel_get(character_info.x, character_info.y + 1))
+	if ((SOUTH_CHARACTER_BOUNDARY > character_info.y) && !display_pixel_get(character_info.x, character_info.y + STEP_SIZE))
 	{
 		display_pixel_set(character_info.x, character_info.y, false);
 
-		character_info.y += 1;
+		character_info.y += STEP_SIZE;
 
 		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
 		{
 			display_pixel_set(character_info.x, character_info.y, true);
 		}
 
-		return 0;
+		return false;
 	}
 
-	return 1;
+	return true;
 }
 
 

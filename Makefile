@@ -55,7 +55,7 @@ font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
 character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-wall.o: wall.c wall.h ../../drivers/display.h character.h game_manager.h
+wall.o: wall.c wall.h ../../drivers/avr/system.h ../../drivers/display.h character.h game_manager.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 uint8toa.o: ../../utils/uint8toa.c ../../utils/uint8toa.h ../../drivers/avr/system.h

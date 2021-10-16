@@ -8,15 +8,18 @@
 
 #include "system.h"
 
-//Character movement restrictions
+// Character movement restrictions
 #define NORTH_CHARACTER_BOUNDARY    0 // Top Row
 #define EAST_CHARACTER_BOUNDARY     4 // Right Column
 #define SOUTH_CHARACTER_BOUNDARY    6 // Bottom Row
 #define WEST_CHARACTER_BOUNDARY     0 // Left Column
 
-//Default starting coordinates
+// Default starting coordinates
 #define DEFAULT_X                   2
 #define DEFAULT_Y                   3
+
+// Distance character moves from a single input
+#define STEP_SIZE 1
 
 
 // Character information (lives and position)
@@ -64,8 +67,8 @@ bool decrease_character_lives(void);
 void character_disable(void);
 
 
-/*  Move character 1 unit in cardinal direction
- *  @return 1 if character moving off boundary else 0
+/*  Move character STEP_SIZE unit/s in cardinal direction
+ *  @return bool true if character moving off boundary else false
  */
 bool move_west(void);
 bool move_east(void);
