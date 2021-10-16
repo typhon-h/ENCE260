@@ -21,7 +21,7 @@
 #include "sound.h"
 #include "led.h"
 
-#define GAME_MODE_PROMPT    " SELECT GAME MODE "
+#define GAME_MODE_PROMPT    " SELECT GAMEMODE "
 #define END_PROMPT          " GAME OVER SCORE:"  //Additional whitespace to insert score
 #define END_PROMPT_LEN      17
 #define SIZE_OF_UINT8       8                    //For buffer on end message for score
@@ -41,7 +41,8 @@ char END_GAME_MUSIC[] = //End menu music
 };
 
 
-bool    ACTIVE_GAME      = false;
+GAMESTATES_t  ACTIVE_GAME      = false;
+
 uint8_t SCORE            = 0;        // has a max of 255
 uint8_t GAME_MODE_index  = 0;
 uint8_t WALL_RANDOM_SEED = 0;
@@ -79,7 +80,7 @@ void game_init(uint8_t message_rate)
 bool get_game_state()
 {
    WALL_RANDOM_SEED++; // Increments global variable WALL_RANDOM_SEED
-   return ACTIVE_GAME;
+   return (ACTIVE_GAME == GAME_PLAY_STATE);
 }
 
 
@@ -101,8 +102,8 @@ void increment_score()
 
 
 /*  Checks for button input to pause game
- *  @brief: button only pauses game if the game is active
- *          MENU_TONE is playedduring paused state
+ *  @brief: button only pauses the game if it's active.
+ *          MENU_TONE is played during paused state
  */
 void check_pause_button(void)
 {
@@ -125,14 +126,14 @@ void check_pause_button(void)
 
 
 /*  Initialize game components when starting
- *  @brief: button only pauses game if the game is active
- *          MENU_TONE is playedduring paused state
+ *  @brief: gives player lives depending on game mode
+ *          initialises all modules used in game
  */
 void game_start()
 {
    uint8_t player_lives;
 
-   switch ((GAMEMODES_t)GAME_MODE_index)
+   switch ( (GAMEMODES_t)GAME_MODE_index)
    {
    case THREE_LIVES:
       player_lives = 3;       // Can collide with wall up to 3 times
@@ -161,46 +162,44 @@ void game_start()
 
 
 /*  Updates game states
- *  @brief: button only pauses game if the game is active
- *          MENU_TONE is played during paused state
+ *  @brief: checks navswitch to scroll through menu (if in menu).
+ *          checks for button push to either redo game or select gamemode.
  */
 void game_state_update()
 {
-   static bool gamemode_selected = false;
-   static bool game_end          = false;
-
-   navswitch_update();
-
-   // If navswitch is pressed, game option menu scrolls down
-   if (navswitch_push_event_p(NAVSWITCH_PUSH) && !game_end)
-   {
-      tinygl_clear();
-      GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;   // Update GAMEMODE_index (currently selected)
-      tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);                  // Display different gamemode text
-      gamemode_selected = true;
-      sound_play(MENU_TONE);
-   }
-
-   button_update(); // Update button input
-
-   if (button_push_event_p(0))
-   {
-      if (game_end) //Show mode menu if pressed at end of game
-      {
-         tinygl_clear();
-         tinygl_text(GAME_MODE_PROMPT);
-         game_end = false;
-         sound_play(MENU_TONE);
-      }
-      else if (gamemode_selected)
-      {
-         // "Game starts when gamemode is selected and button pushed"
-         gamemode_selected = false; //Game mode menu reappears on restart
-         game_end          = true;  //Next menu will be end of game
-         sound_play(MENU_TONE);
-         game_start();
-      }
-   }
+	navswitch_update();
+	button_update(); // Update button input
+	
+	switch (ACTIVE_GAME)
+	{
+	case SELECTION_STATE:
+		if (navswitch_push_event_p(NAVSWITCH_PUSH))
+		{
+      		tinygl_clear();
+      		GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;   // Update GAMEMODE_index (currently selected)
+      		tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);                  // Display different gamemode text
+		}
+		if (button_push_event_p(0))
+		{
+      		sound_play(MENU_TONE);
+       		ACTIVE_GAME = GAME_PLAY_STATE;
+       		game_start();
+		}
+		break;
+		
+	case GAME_PLAY_STATE:
+		break;
+		
+	case GAME_END_STATE:
+		if (button_push_event_p(0))
+		{
+	    	tinygl_clear();
+         	tinygl_text(GAME_MODE_PROMPT);
+          	sound_play(MENU_TONE);
+          	ACTIVE_GAME = SELECTION_STATE;
+		}
+		break;
+	}
 }
 
 
@@ -212,7 +211,7 @@ void decrease_lives(void)
 {
    if (decrease_character_lives())
    {
-      ACTIVE_GAME = false;
+      ACTIVE_GAME = GAME_END_STATE;
       toggle_wall(false);
       character_disable();
       game_outro();
@@ -221,10 +220,10 @@ void decrease_lives(void)
 
 
 
-/*  Outlines the outcome of a collsion (decided by each game_mode)
- *  @brief: HARDMODE    = dcreases lives (only 1 life so instant death)
+/*  Outlines the process of a collsion (decided by each gamemode)
+ *  @brief:    HARDMODE = dcreases lives (only 1 life so instant death)
  *          THREE_LIVES = dcreases lives (from which player has 3)
- *          WALL_PUSH   = "pushes" by moving player in direction of wall momvement
+ *            WALL_PUSH = "pushes" by moving player in direction of wall momvement
  */
 void gamemode_collsion_process(void)
 {
