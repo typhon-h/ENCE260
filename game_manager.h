@@ -21,6 +21,14 @@ typedef enum {
 	WALL_PUSH
 } GAMEMODES_t;
 
+
+// enum containing different game states
+typedef enum {
+	SELECTION_STATE,     // For selection of gamemode
+	GAME_PLAY_STATE,     // Actual gameplay state
+	GAME_END_STATE       // game ending
+} GAMESTATES_t;
+
 // Menu text for each gamemode (for displaying)
 #define HARD_MODE_TEXT      " HARDMODE "    
 #define THREE_LIVES_TEXT    " THREE LIVES "
