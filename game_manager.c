@@ -3,6 +3,7 @@
  *  @date   10 Oct 2021
  *  @brief  Controls key game components:
  *          Menus
+ *          Various gamemodes
  *          Game Start/Stop
  *          Key events
  */
@@ -169,7 +170,7 @@ void game_state_update()
 {
 	navswitch_update();
 	button_update(); // Update button input
-	
+
 	switch (ACTIVE_GAME)
 	{
 	case SELECTION_STATE:
@@ -178,18 +179,18 @@ void game_state_update()
       		tinygl_clear();
       		GAME_MODE_index = (GAME_MODE_index + 1) % DIFFERENT_GAMEMODES;   // Update GAMEMODE_index (currently selected)
       		tinygl_text(GAMEMODE_STRINGS[GAME_MODE_index]);                  // Display different gamemode text
+            sound_play(MENU_TONE);
 		}
 		if (button_push_event_p(0))
 		{
-      		sound_play(MENU_TONE);
        		ACTIVE_GAME = GAME_PLAY_STATE;
        		game_start();
 		}
 		break;
-		
+
 	case GAME_PLAY_STATE:
 		break;
-		
+
 	case GAME_END_STATE:
 		if (button_push_event_p(0))
 		{

@@ -5,7 +5,6 @@
  */
 
 #include "system.h"
-#include "display.h"
 #include "tinygl.h"
 #include "task.h"
 #include "character.h"
@@ -16,7 +15,7 @@
 //Frequency of task execution in hz
 #define DISPLAY_UPDATE_RATE            300
 #define INPUT_UPDATE_RATE              20
-#define TWEETER_TASK_RATE              5000
+#define TWEETER_TASK_RATE              TWEETER_SWITCH_RATE
 #define MELODY_TASK_RATE               100
 #define MESSAGE_RATE                   20  // Tinygl text scroll speed
 
@@ -134,10 +133,9 @@ int main(void)
 {
 	// Module initialization
 	system_init();
-	display_init();
 	tinygl_init(DISPLAY_UPDATE_RATE);
 	game_init(MESSAGE_RATE);
-	sound_init(TWEETER_TASK_RATE, MELODY_TASK_RATE);
+	sound_init(MELODY_TASK_RATE);
 
 	// Task definitions
 	task_t tasks[] =

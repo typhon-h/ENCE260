@@ -1,76 +1,84 @@
+/** @file   sound.c
+ *  @author Lucas Trickett, Harrison Tyson
+ *  @date   16 Oct 2021
+ *  @brief  Sound profiles
+ */
+
 #include "system.h"
+#include "sound.h"
 #include "../../extra/tweeter.h"
 #include "../../extra/mmelody.h"
 #include "pio.h"
-#include "sound.h"
 
-//Tweeter pins
-#define PIEZO1_PIO    PIO_DEFINE(PORT_D, 4)        //Pin 1
-#define PIEZO2_PIO    PIO_DEFINE(PORT_D, 6)        //Pin 3
-
-//Default music speed
-#define MELODY_BPM_DEFAULT             200
-
-// Need to get rid of this magic number = TWEETER_TASK_RATE
-static tweeter_scale_t scale_table[] = TWEETER_SCALE_TABLE(5000);
+// Speaker objects
+static tweeter_scale_t scale_table[] = TWEETER_SCALE_TABLE(TWEETER_SWITCH_RATE); // Initialize required PWM for notes
 static tweeter_t       tweeter;
-static mmelody_t       melody;
-static mmelody_obj_t   melody_info;
 static tweeter_obj_t   tweeter_info;
 
-// Activate speaker
-void toggle_speaker(bool state)
+// Melody objects
+static mmelody_t       melody;
+static mmelody_obj_t   melody_info;
+
+
+/* Initialisation for sound module
+ * @param uint16_t rate melody task updates in hz
+ * @brief: Initializes tweeter and melody objects
+ */
+void sound_init(uint16_t tune_task_rate)
 {
-   //Implements dual pin push/pull polling
-   pio_output_set(PIEZO1_PIO, state);
-   pio_output_set(PIEZO2_PIO, !state);
+	// Speaker object init
+	tweeter = tweeter_init(&tweeter_info, TWEETER_SWITCH_RATE, scale_table);
+
+	//Speaker pins init
+	pio_config_set(SPEAKER_PIN1, PIO_OUTPUT_LOW);
+	pio_config_set(SPEAKER_PIN2, PIO_OUTPUT_LOW);
+
+	// Melody object init
+	melody = mmelody_init(&melody_info, tune_task_rate,
+	                      (mmelody_callback_t)tweeter_note_play, tweeter);
+	mmelody_speed_set(melody, MELODY_BPM_DEFAULT);
 }
 
 
-void speaker_update() // Check if the speaker needs to be on and toggle it
+/* Toggle piezo speaker
+ * @brief: Switches high/low states on the pins
+ * to implement a push/pull polling method
+ */
+static void toggle_speaker(bool state)
 {
-   bool state = tweeter_update(tweeter);
-
-   toggle_speaker(state);
+	pio_output_set(SPEAKER_PIN1, state);
+	pio_output_set(SPEAKER_PIN2, !state);
 }
 
 
-void sound_update() // Update current sound
+/* Get required speaker state (on/off)
+ * and toggle speaker accordingly
+ */
+void speaker_update()
 {
-   mmelody_update(melody);
+	bool state = tweeter_update(tweeter);
+
+	toggle_speaker(state);
 }
 
 
-void sound_stop() // Stop playing current sound
+/* Advance the current melody */
+void sound_update()
 {
-   mmelody_play(melody, "");
+	mmelody_update(melody);
 }
 
 
-void sound_play(char song[]) //Play song
+/* Play a song
+ * @param song: char array containing song to play in mmelody notation */
+void sound_play(char song[])
 {
-   mmelody_play(melody, song);
+	mmelody_play(melody, song);
 }
 
 
-void beep() // Single beep used for testing
+/* Stop tune currently playing */
+void sound_stop()
 {
-   mmelody_play(melody, "C,C+,C");
-}
-
-
-// Initialize sound drivers
-void sound_init(uint16_t tweeter_task_rate, uint16_t tune_task_rate)
-{
-   // Speaker object init
-   tweeter = tweeter_init(&tweeter_info, tweeter_task_rate, scale_table);
-
-   //Speaker pins init
-   pio_config_set(PIEZO1_PIO, PIO_OUTPUT_LOW);
-   pio_config_set(PIEZO2_PIO, PIO_OUTPUT_LOW);
-
-   // Melody object init
-   melody = mmelody_init(&melody_info, tune_task_rate,
-                         (mmelody_callback_t)tweeter_note_play, tweeter);
-   mmelody_speed_set(melody, MELODY_BPM_DEFAULT);
+	mmelody_play(melody, "");
 }
