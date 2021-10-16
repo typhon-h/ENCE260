@@ -12,7 +12,7 @@
 
 
 // Global variable used to store wall information
-static WallStruct ACTIVE_WALL;
+static WallStruct active_wall;
 
 
 /*  Initialises module
@@ -24,8 +24,8 @@ void wall_init(uint8_t initial_seed)
 {
 	srand(initial_seed);
 	// Reset wall if active wall exists (game reset)
-	ACTIVE_WALL.wall_type = OUT_OF_BOUNDS;
-	ACTIVE_WALL.bit_data  = 0;
+	active_wall.wall_type = OUT_OF_BOUNDS;
+	active_wall.bit_data  = 0;
 }
 
 
@@ -39,8 +39,8 @@ static WallStruct decide_wall_type(uint8_t direction_seed, uint8_t hole_size_see
 	WallStruct new_wall;
 	uint8_t    wall_bitmap;
 
-	uint8_t wall_direction = (direction_seed) % NUM_OF_DIRECTIONS + 1; // Random number in interval [1, NUM_OF_DIRECTIONS], decides wall direction
-	uint8_t hole_size      = (hole_size_seed) % MAX_HOLE_SIZE + 1;     // Random number in interval [1, MAX_HOLE_SIZE], decides hole size
+	uint8_t wall_direction = (direction_seed) % NUM_OF_DIRECTIONS + 1;     // Random number in interval [1, NUM_OF_DIRECTIONS], decides wall direction
+	uint8_t hole_size      = (hole_size_seed) % MAX_HOLE_SIZE + 1;         // Random number in interval [1, MAX_HOLE_SIZE], decides hole size
 
 	// Randomly shift hole along the wall, must be less than (wall_size - hole_size)
 	// (e.g. if ROW and hole_size is 3, shift must be less than 6-3)
@@ -64,32 +64,32 @@ static WallStruct decide_wall_type(uint8_t direction_seed, uint8_t hole_size_see
 		break;
 
 	default:
-		hole_size = 0b1; //Ensures a gap of 1 will always exist
+		hole_size = 0b1;         //Ensures a gap of 1 will always exist
 		break;
 	}
 
-	wall_bitmap = GENERATE_HOLE(hole_size, hole_shift);  // Generates wall bit_data using the random parameters
+	wall_bitmap = GENERATE_HOLE(hole_size, hole_shift);      // Generates wall bit_data using the random parameters
 
 	// Creates wall moving in given direction
 	switch (wall_direction)
 	{
-	case NORTH:     // NORTH moving wall, ROW
+	case NORTH:         // NORTH moving wall, ROW
 		new_wall = (WallStruct)NORTH_MOVING_WALL(wall_bitmap);
 		break;
 
-	case EAST:      // EAST moving wall, COLUMN
+	case EAST:          // EAST moving wall, COLUMN
 		new_wall = (WallStruct)EAST_MOVING_WALL(wall_bitmap);
 		break;
 
-	case SOUTH:     // SOUTH moving wall, ROW
+	case SOUTH:         // SOUTH moving wall, ROW
 		new_wall = (WallStruct)SOUTH_MOVING_WALL(wall_bitmap);
 		break;
 
-	case WEST:      // WEST moving wall, COLUMN
+	case WEST:          // WEST moving wall, COLUMN
 		new_wall = (WallStruct)WEST_MOVING_WALL(wall_bitmap);
 		break;
 
-	default:      // East moving wall as failsafe
+	default:          // East moving wall as failsafe
 		new_wall = (WallStruct)EAST_MOVING_WALL(wall_bitmap);
 		break;
 	}
@@ -98,7 +98,7 @@ static WallStruct decide_wall_type(uint8_t direction_seed, uint8_t hole_size_see
 }
 
 
-/*  Resets and randomises ACTIVE_WALL
+/*  Resets and randomises active_wall
  *  @brief: starting random seed is initialised in wall_init() with srand()
  *          uses helper function decide_wall_type() to create wall
  */
@@ -110,9 +110,9 @@ void wall_create(void)
 	uint8_t hole_shift_seed = rand();
 
 	// Generate wall type
-	ACTIVE_WALL = decide_wall_type(direction_seed, hole_size_seed, hole_shift_seed);
+	active_wall = decide_wall_type(direction_seed, hole_size_seed, hole_shift_seed);
 
-	toggle_wall(true);   //Display wall
+	toggle_wall(true);       //Display wall
 }
 
 
@@ -120,33 +120,33 @@ void wall_create(void)
  * @return WallStruct active wall*/
 WallStruct get_active_wall()
 {
-	return ACTIVE_WALL;
+	return active_wall;
 }
 
 
-/*  Toggles display state of ACTIVE_WALL
- *  @param display_on: if 0 = then ACTIVE_WALL in wall.c isn't displayed
+/*  Toggles display state of active_wall
+ *  @param display_on: if 0 = then active_wall in wall.c isn't displayed
  */
 void toggle_wall(bool display_on)
 {
 	// If display is off, pattern if 0
-	uint8_t pattern = (display_on) ? ACTIVE_WALL.bit_data : 0;
+	uint8_t pattern = (display_on) ? active_wall.bit_data : 0;
 	uint8_t index;
-	uint8_t position = ACTIVE_WALL.pos;  // Position of the wall
+	uint8_t position = active_wall.pos;      // Position of the wall
 
 	CharacterInfoStruct character = get_character_info();
 
-	switch (ACTIVE_WALL.wall_type)
+	switch (active_wall.wall_type)
 	{
 	// If wall_type is ROW, position is in y-axis
 	case ROW:
 		// Iterate each pixel
 		for (index = 0; index <= DISPLAY_WIDTH; index++)
 		{
-			bool state = (BIT(index) & pattern) != 0;                // Gets the index-th bit of the walls bit_data
-			if ((index != character.x) || (position != character.y)) // Wont display over character
+			bool state = (BIT(index) & pattern) != 0;                            // Gets the index-th bit of the walls bit_data
+			if ((index != character.x) || (position != character.y))             // Wont display over character
 			{
-				display_pixel_set(index, position, state);           // display the state of each pixel in wall
+				display_pixel_set(index, position, state);                       // display the state of each pixel in wall
 			}
 		}
 		break;
@@ -156,10 +156,10 @@ void toggle_wall(bool display_on)
 		// Iterate each pixel
 		for (index = 0; index <= DISPLAY_HEIGHT; index++)
 		{
-			bool state = (BIT(index) & pattern) != 0;                // Gets the index-th bit of the walls bit_data
-			if ((position != character.x) || (index != character.y)) // Wont display over character
+			bool state = (BIT(index) & pattern) != 0;                            // Gets the index-th bit of the walls bit_data
+			if ((position != character.x) || (index != character.y))             // Wont display over character
 			{
-				display_pixel_set(position, index, state);           // display the state of each pixel in wall
+				display_pixel_set(position, index, state);                       // display the state of each pixel in wall
 			}
 		}
 		break;
@@ -171,24 +171,23 @@ void toggle_wall(bool display_on)
 
 
 /*  Moves active wall in direction defined by wall
- *  @brief: moves wall, sets WALL_TYPE to OUT_OF_BOUNDS is greater than ACTIVE_WALL.boundary_cond
+ *  @brief: moves wall, sets WALL_TYPE to OUT_OF_BOUNDS is greater than active_wall.boundary_cond
  */
 void move_wall()
 {
 	// Toggle wall display state to off before moving it
 	toggle_wall(false);
 
-	// As the enums SOUTH / EAST = 2 / 4, the below expression will increase position.
-	// As NORTH and WEST are directions of decreasing position, position will decreases
-	ACTIVE_WALL.pos += (ACTIVE_WALL.direction % 2 == 0) ? STEP_SIZE: -STEP_SIZE;
+	// NORTH/WEST are positive increments SOUTH/WEST are negative
+	active_wall.pos += (active_wall.direction == NORTH || active_wall.direction == WEST) ? STEP_SIZE: -STEP_SIZE;
 
 	// Positions are unsigned, thus only one boundary check is needed
 	// (as for negative moving directions pos = 0 -> 255, = above boundary)
-	if (ACTIVE_WALL.pos > ACTIVE_WALL.boundary_cond)
+	if (active_wall.pos > active_wall.boundary_cond)
 	{
-		ACTIVE_WALL.wall_type = OUT_OF_BOUNDS;
+		active_wall.wall_type = OUT_OF_BOUNDS;
 		return;
 	}
 
-	toggle_wall(true);   // Won't change anything if ACTIVE_WALL is NULL
+	toggle_wall(true);       // Won't change anything if active_wall is NULL
 }
