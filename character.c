@@ -15,6 +15,7 @@ static CharacterInfoStruct character_info;
 /* Initialisation for character module
  * @param life_count: creates player with respective number of lives
  * @brief: Character creation, spawns character at default coordinates
+ *         If toggle is active from previous games it is turned off
  */
 void character_init(uint8_t life_count)
 {
@@ -59,7 +60,7 @@ void toggle_stun(bool stun_set)
 
 
 /* Reduces character lives by 1
- *  @return: returns 1 if no lives left else 0
+ *  @return: returns 1 if no lives left, else returns 0
  */
 bool decrease_character_lives()
 {
@@ -68,7 +69,7 @@ bool decrease_character_lives()
 }
 
 
-/* Turns off character
+/* Turns dipslay state for character off
  */
 void character_disable()
 {
@@ -76,20 +77,16 @@ void character_disable()
 }
 
 
-/*  Move character STEP_SIZE unit west
- *  @return true if character moving off boundary else false*/
+/*  Moves character STEP_SIZE unit west
+ *  @return true if character moving off boundary else false
+ */
 bool move_west()
 {
 	if ((WEST_CHARACTER_BOUNDARY < character_info.x) && !display_pixel_get(character_info.x - STEP_SIZE, character_info.y))
 	{
-		display_pixel_set(character_info.x, character_info.y, false);
-
+		character_disable();
 		character_info.x -= STEP_SIZE;
-
-		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
-		{
-			display_pixel_set(character_info.x, character_info.y, true);
-		}
+		display_pixel_set(character_info.x, character_info.y, true);
 
 		return false;
 	}
@@ -99,19 +96,16 @@ bool move_west()
 
 
 /*  Move character STEP_SIZE unit east
- *  @return true if character moving off boundary else false*/
+ *  @return true if character moving off boundary else false
+ */
 bool move_east()
 {
+	// Wont move character off sern boundary or into a position already occupied (by a wall)
 	if ((EAST_CHARACTER_BOUNDARY > character_info.x) && !display_pixel_get(character_info.x + STEP_SIZE, character_info.y))
 	{
-		display_pixel_set(character_info.x, character_info.y, false);
-
+		character_disable();
 		character_info.x += STEP_SIZE;
-
-		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
-		{
-			display_pixel_set(character_info.x, character_info.y, true);
-		}
+		display_pixel_set(character_info.x, character_info.y, true);
 
 		return false;
 	}
@@ -121,19 +115,16 @@ bool move_east()
 
 
 /*  Move character STEP_SIZE unit north
- *  @return true if character moving off boundary else false*/
+ *  @return true if character moving off boundary else false
+ */
 bool move_north()
 {
+	// Wont move character off northern boundary or into a position already occupied (by a wall)
 	if ((NORTH_CHARACTER_BOUNDARY < character_info.y) && !display_pixel_get(character_info.x, character_info.y - STEP_SIZE))
 	{
-		display_pixel_set(character_info.x, character_info.y, false);
-
+		character_disable();
 		character_info.y -= STEP_SIZE;
-
-		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
-		{
-			display_pixel_set(character_info.x, character_info.y, true);
-		}
+		display_pixel_set(character_info.x, character_info.y, true);
 
 		return false;
 	}
@@ -143,28 +134,25 @@ bool move_north()
 
 
 /*  Move character STEP_SIZE unit south
- *  @return true if character moving off boundary else false*/
+ *  @return true if character moving off boundary else false
+ */
 bool move_south()
 {
+	// Wont move character off southern boundary or into a position already occupied (by a wall)
 	if ((SOUTH_CHARACTER_BOUNDARY > character_info.y) && !display_pixel_get(character_info.x, character_info.y + STEP_SIZE))
 	{
-		display_pixel_set(character_info.x, character_info.y, false);
-
+		character_disable();
 		character_info.y += STEP_SIZE;
-
-		if (!display_pixel_get(character_info.x, character_info.y))         // Don't move character if destination is on
-		{
-			display_pixel_set(character_info.x, character_info.y, true);
-		}
+		display_pixel_set(character_info.x, character_info.y, true);
 
 		return false;
 	}
-
+	
 	return true;
 }
 
 
-/* Poll navswitch input and move character
+/*  Poll navswitch input and move character
  *  @brief: Doesn't allow movement is player is stunned
  */
 void character_update()
