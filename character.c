@@ -23,7 +23,7 @@ void character_init(uint8_t life_count)
 		.x = DEFAULT_X, .y = DEFAULT_Y, .lives = life_count
 	};
 
-	display_pixel_set(character_info.x, character_info.y, true);
+	character_enable();
 
 	if (get_stun_condition())     //Prevent character being stunned on respawn
 	{
@@ -76,6 +76,13 @@ void character_disable()
 	display_pixel_set(character_info.x, character_info.y, false);
 }
 
+/* Turns display state for character only
+*/
+void character_enable()
+{
+	display_pixel_set(character_info.x, character_info.y, true);
+}
+
 
 /*  Moves character STEP_SIZE unit west
  *  @return true if character moving off boundary else false
@@ -86,7 +93,7 @@ bool move_west()
 	{
 		character_disable();
 		character_info.x -= STEP_SIZE;
-		display_pixel_set(character_info.x, character_info.y, true);
+		character_enable();
 
 		return false;
 	}
@@ -105,7 +112,7 @@ bool move_east()
 	{
 		character_disable();
 		character_info.x += STEP_SIZE;
-		display_pixel_set(character_info.x, character_info.y, true);
+		character_enable();
 
 		return false;
 	}
@@ -124,7 +131,7 @@ bool move_north()
 	{
 		character_disable();
 		character_info.y -= STEP_SIZE;
-		display_pixel_set(character_info.x, character_info.y, true);
+		character_enable();
 
 		return false;
 	}
@@ -143,11 +150,11 @@ bool move_south()
 	{
 		character_disable();
 		character_info.y += STEP_SIZE;
-		display_pixel_set(character_info.x, character_info.y, true);
+		character_enable();
 
 		return false;
 	}
-	
+
 	return true;
 }
 
@@ -162,7 +169,7 @@ void character_update()
 	//Restores character state if passed by wall
 	if (!display_pixel_get(character_info.x, character_info.y))
 	{
-		display_pixel_set(character_info.x, character_info.y, true);
+		character_enable();
 	}
 
 	// Move character in direction of navswitch input

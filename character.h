@@ -67,6 +67,11 @@ bool decrease_character_lives(void);
 void character_disable(void);
 
 
+/* Turns display state for character only
+*/
+void character_enable(void);
+
+
 /*  Move character STEP_SIZE unit/s in cardinal direction
  *  @return bool true if character moving off boundary else false
  */
