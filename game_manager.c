@@ -93,7 +93,7 @@ bool get_pause_state()
 void check_pause_button()
 {
    button_update(); // Update button input
-   if (button_push_event_p(0) & active_game) // if button is pressed AND game is active
+   if (button_push_event_p(0) && active_game == GAME_PLAY_STATE) // if button is pressed AND game is active
    {
       pause_status = !pause_status; // Toggles pause state each press
       led_set(LED1, pause_status);  // If paused, LED lights up
@@ -120,9 +120,9 @@ void game_state_update()
 
 	switch (active_game)
 	{
-	case MENU_STATE: 
+	case MENU_STATE:
 		// If any input, gamemode is displayed and game state if SELECTION
-		if (navswitch_push_event_p(NAVSWITCH_PUSH) | button_push_event_p(0)) 
+		if (navswitch_push_event_p(NAVSWITCH_PUSH) | button_push_event_p(0))
 		{
             sound_play(MENU_TONE);
 			active_game = SELECTION_STATE;
@@ -132,7 +132,7 @@ void game_state_update()
 		break;
 
 	case SELECTION_STATE:
-	
+
 		if (navswitch_push_event_p(NAVSWITCH_PUSH)) // Change game mode
 		{
       		tinygl_clear();
