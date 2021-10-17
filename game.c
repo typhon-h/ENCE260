@@ -12,7 +12,7 @@
 #include "game_manager.h"
 #include "sound.h"
 
-//Frequency of task execution in hz
+//Frequency of task execution in Hz
 #define DISPLAY_UPDATE_RATE            300
 #define INPUT_UPDATE_RATE              20
 #define TWEETER_TASK_RATE              TWEETER_SWITCH_RATE
