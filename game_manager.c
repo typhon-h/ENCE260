@@ -149,7 +149,7 @@ void game_state_update()
 		break;
 
 	case GAME_END_STATE: // Return to menu
-		if (button_push_event_p(0))
+		if (navswitch_push_event_p(NAVSWITCH_PUSH) | button_push_event_p(0))
 		{
 	    	tinygl_clear();
          	tinygl_text(GAME_MODE_PROMPT);
