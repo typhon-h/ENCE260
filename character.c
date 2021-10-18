@@ -25,7 +25,7 @@ void character_init(uint8_t life_count)
 
 	character_enable();
 
-	if (get_stun_condition())         //Prevent character being stunned on respawn
+	if (get_stun_condition())             //Prevent character being stunned on respawn
 	{
 		toggle_stun(false);
 	}
@@ -166,7 +166,7 @@ bool move_south()
  */
 void character_update()
 {
-	navswitch_update();         // Update navswitch input
+	navswitch_update();             // Update navswitch input
 
 	//Restores character state if passed by wall
 	if (!display_pixel_get(character_info.x, character_info.y))

@@ -23,13 +23,13 @@
 static char GAME_MUSIC[] =   // Music to loop during gameplay
 {
 #include "sounds/megalovania.mmel"
-	     " :"           // Loop indefinitely
+	     " :"                   // Loop indefinitely
 };
 
 static char END_GAME_MUSIC[] = // End menu music
 {
 #include "sounds/rick_roll.mmel"
-	     " :" // Loop indefinitely
+	     " :"         // Loop indefinitely
 };
 
 // Game Constants
@@ -71,7 +71,7 @@ void game_init(uint8_t message_rate)
  */
 bool get_game_state()
 {
-	wall_random_seed++; // Increments variable wall_random_seed
+	wall_random_seed++;         // Increments variable wall_random_seed
 	return(active_game == GAME_PLAY_STATE);
 }
 
@@ -91,18 +91,18 @@ bool get_pause_state()
  */
 void check_pause_button()
 {
-	button_update();                                                // Update button input
-	if (button_push_event_p(0) && (active_game == GAME_PLAY_STATE)) // if button is pressed AND game is active
+	button_update();                                                        // Update button input
+	if (button_push_event_p(0) && (active_game == GAME_PLAY_STATE))         // if button is pressed AND game is active
 	{
-		pause_status = !pause_status;                               // Toggles pause state each press
-		led_set(LED1, pause_status);                                // If paused, LED lights up
+		pause_status = !pause_status;                                       // Toggles pause state each press
+		led_set(LED1, pause_status);                                        // If paused, LED lights up
 		if (pause_status)
 		{
-			sound_play(MENU_TONE);  // If paused, MENU_TONE is played
+			sound_play(MENU_TONE);                          // If paused, MENU_TONE is played
 		}
 		else
 		{
-			sound_play(GAME_MUSIC); // if not paused, GAME_MUSIC is played
+			sound_play(GAME_MUSIC);                         // if not paused, GAME_MUSIC is played
 		}
 	}
 }
@@ -132,22 +132,22 @@ void game_state_update()
 
 	case SELECTION_STATE:
 
-		if (navswitch_push_event_p(NAVSWITCH_PUSH))         // Change game mode
+		if (navswitch_push_event_p(NAVSWITCH_PUSH))                         // Change game mode
 		{
 			tinygl_clear();
-			game_mode_index = (game_mode_index + 1) % DIFFERENT_GAMEMODES;       // Update GAMEMODE_index (currently selected)
-			tinygl_text(GAMEMODE_STRINGS[game_mode_index]);                      // Display different gamemode text
+			game_mode_index = (game_mode_index + 1) % DIFFERENT_GAMEMODES;                               // Update GAMEMODE_index (currently selected)
+			tinygl_text(GAMEMODE_STRINGS[game_mode_index]);                                              // Display different gamemode text
 			sound_play(MENU_TONE);
 		}
 
-		if (button_push_event_p(0))         // Start game
+		if (button_push_event_p(0))                         // Start game
 		{
 			active_game = GAME_PLAY_STATE;
 			game_start();
 		}
 		break;
 
-	case GAME_END_STATE:     // Return to menu
+	case GAME_END_STATE:             // Return to menu
 		if (navswitch_push_event_p(NAVSWITCH_PUSH) | button_push_event_p(0))
 		{
 			tinygl_clear();
@@ -158,7 +158,7 @@ void game_state_update()
 
 		break;
 
-	case GAME_PLAY_STATE: // Buttons disabled
+	case GAME_PLAY_STATE:         // Buttons disabled
 	default:
 		break;
 	}
@@ -173,31 +173,31 @@ void game_start()
 {
 	uint8_t player_lives;
 
-	switch ((GAMEMODES_t)game_mode_index)  // Set player lives based on game mode
+	switch ((GAMEMODES_t)game_mode_index)          // Set player lives based on game mode
 	{
 	case THREE_LIVES:
-		player_lives = 3;     // Can collide with wall up to 3 times
+		player_lives = 3;                     // Can collide with wall up to 3 times
 		break;
 
 	case HARD_MODE:
-		player_lives = 1;     // Instant death upon collision
+		player_lives = 1;                     // Instant death upon collision
 		break;
 
 	case WALL_PUSH:
-		player_lives = 1;     // Death instant for OUT_OF_BOUNDS
+		player_lives = 1;                     // Death instant for OUT_OF_BOUNDS
 		break;
 
 	default:
-		player_lives = 3; // Game will default to three_lives mode (if index > 3)
+		player_lives = 3;                 // Game will default to three_lives mode (if index > 3)
 	}
 
-	tinygl_clear();                // Clear display
-	character_init(player_lives);  // Initialise character module (with given lives)
-	wall_init(wall_random_seed);   // Initialises wall module with random seed
+	tinygl_clear();                        // Clear display
+	character_init(player_lives);          // Initialise character module (with given lives)
+	wall_init(wall_random_seed);           // Initialises wall module with random seed
 
-	sound_play(GAME_MUSIC);        // Plays game music
-	score       = 0;               // Reset gamescore (from previous game)
-	active_game = GAME_PLAY_STATE; // game is started so playing state
+	sound_play(GAME_MUSIC);                // Plays game music
+	score       = 0;                       // Reset gamescore (from previous game)
+	active_game = GAME_PLAY_STATE;         // game is started so playing state
 }
 
 
@@ -245,7 +245,7 @@ static bool collision_dectection(void)
  */
 static void gamemode_collsion_process(void)
 {
-	bool player_at_border; // boolean describing if player is pushed beyond border
+	bool player_at_border;         // boolean describing if player is pushed beyond border
 
 	switch ((GAMEMODES_t)game_mode_index)
 	{
@@ -254,7 +254,7 @@ static void gamemode_collsion_process(void)
 		// Will simply reduce the number of lives by 1
 		// stun is introduced to prevent multiple loss of lives from a single collision
 		decrease_lives();
-		toggle_stun(true);         // Automatically is unstun when wall moves again
+		toggle_stun(true);                         // Automatically is unstun when wall moves again
 		break;
 
 	case WALL_PUSH:
@@ -264,7 +264,7 @@ static void gamemode_collsion_process(void)
 			// Since Wall is ROW, wall is moving either NORTH or SOUTH
 			player_at_border = (get_active_wall().direction == NORTH) ? move_north(): move_south();
 		}
-		else // Since Wall is COLUMN, wall is moving either EAST or WEST
+		else                 // Since Wall is COLUMN, wall is moving either EAST or WEST
 		{
 			player_at_border = (get_active_wall().direction == EAST) ? move_east(): move_west();
 		}
@@ -295,9 +295,9 @@ void check_collisions()
 {
 	if (get_game_state())
 	{
-		if (collision_dectection() & !get_stun_condition()) // If collision and not stunned
+		if (collision_dectection() & !get_stun_condition())                 // If collision and not stunned
 		{
-			gamemode_collsion_process();                    // What occurs during a collision
+			gamemode_collsion_process();                                    // What occurs during a collision
 		}
 	}
 }
