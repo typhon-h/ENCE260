@@ -19,7 +19,7 @@
 #define DEFAULT_Y                   3
 
 // Distance character moves from a single input
-#define STEP_SIZE 1
+#define STEP_SIZE                   1
 
 
 // Character information (lives and position)
@@ -68,7 +68,7 @@ void character_disable(void);
 
 
 /* Turns display state for character only
-*/
+ */
 void character_enable(void);
 
 

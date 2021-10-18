@@ -33,7 +33,7 @@ static uint8_t wall_speed = DEFAULT_SPEED; // Default wall speed (walls/second)
  *  @param unused void pointer passed by task scheduler */
 static void display_task(__unused__ void *data)
 {
-	tinygl_update(); //Update scrolling text
+	tinygl_update();     //Update display and/or scrolling text
 }
 
 
@@ -52,7 +52,7 @@ static void wall_task(__unused__ void *data)
 		else
 		{
 			move_wall();
-			toggle_stun(0); // Reset stun condition when wall moves over character
+			toggle_stun(0);             // Reset stun condition when wall moves over character
 		}
 
 		check_collisions();
@@ -96,13 +96,13 @@ static void difficulty_task(void *data)
 {
 	if (!get_pause_state())
 	{
-		static uint8_t counter = 0; // Tracks number of function calls
+		static uint8_t counter = 0;         // Tracks number of function calls
 		task_t         *task   = data;
 
 		task->period = TASK_RATE / wall_speed;
 		counter++;
 
-        // Increases speed after WALL_SPEED_INCREMENT_RATE times the task frequency
+		// Increases speed after WALL_SPEED_INCREMENT_RATE times the task frequency
 		if (counter >= WALL_SPEED_INCREMENT_RATE)
 		{
 			wall_speed  += WALL_SPEED_INCREMENT_AMOUNT;

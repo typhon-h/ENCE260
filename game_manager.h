@@ -38,10 +38,10 @@ typedef enum
 // Enum containing different game states
 typedef enum
 {
-	MENU_STATE,              // Adding so push button doesnt select gamemode without title
-	SELECTION_STATE,         // Menu state
-	GAME_PLAY_STATE,         // Actual gameplay state
-	GAME_END_STATE           // Game ending
+	MENU_STATE,                  // Adding so push button doesnt select gamemode without title
+	SELECTION_STATE,             // Menu state
+	GAME_PLAY_STATE,             // Actual gameplay state
+	GAME_END_STATE               // Game ending
 } GAMESTATES_t;
 
 
@@ -81,14 +81,14 @@ void game_state_update(void);
 
 /*  Initialize game components when starting
  *  @brief: gives player lives depending on game mode
- *          initialises all modules used in game 
+ *          initialises all modules used in game
  */
 void game_start(void);
 
 
 /*  Outlines process of a game_ending (text display, music played)
-*  @brief: Displays score and plays ending music END_GAME_MUSIC
-*/
+ *  @brief: Displays score and plays ending music END_GAME_MUSIC
+ */
 void game_outro(void);
 
 
@@ -108,7 +108,7 @@ void decrease_lives(void);
 
 
 /*  Increments game score
- *  @brief: as there is a single moving wall, this is called ervery time the wall resets 
+ *  @brief: as there is a single moving wall, this is called every time the wall resets
  */
 void increment_score(void);
 

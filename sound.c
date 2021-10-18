@@ -16,8 +16,8 @@ static tweeter_t       tweeter;
 static tweeter_obj_t   tweeter_info;
 
 // Melody objects
-static mmelody_t       melody;
-static mmelody_obj_t   melody_info;
+static mmelody_t     melody;
+static mmelody_obj_t melody_info;
 
 
 /* Initialisation for sound module

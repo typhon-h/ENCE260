@@ -52,22 +52,22 @@ tinygl.o: ../../utils/tinygl.c ../../drivers/avr/system.h ../../drivers/display.
 font.o: ../../utils/font.c ../../drivers/avr/system.h ../../utils/font.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
-character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-wall.o: wall.c wall.h ../../drivers/avr/system.h ../../drivers/display.h character.h game_manager.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
 uint8toa.o: ../../utils/uint8toa.c ../../utils/uint8toa.h ../../drivers/avr/system.h
-	$(CC) -c $(CFLAGS) $< -o $@
-
-game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font3x5_1.h ../../utils/uint8toa.h ../../drivers/led.h sound.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 mmelody.o: ../../extra/mmelody.c ../../extra/mmelody.h ../../drivers/avr/system.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 tweeter.o: ../../extra/tweeter.c ../../extra/tweeter.h ../../drivers/avr/system.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+character.o: character.c character.h ../../drivers/display.h ../../drivers/navswitch.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+wall.o: wall.c wall.h ../../drivers/avr/system.h ../../drivers/display.h character.h
+	$(CC) -c $(CFLAGS) $< -o $@
+
+game_manager.o: game_manager.c game_manager.h wall.h character.h ../../drivers/avr/system.h ../../drivers/button.h ../../utils/tinygl.h ../../fonts/font3x5_1.h ../../utils/uint8toa.h ../../drivers/led.h sound.h
 	$(CC) -c $(CFLAGS) $< -o $@
 
 sound.o: sound.c sound.h ../../extra/tweeter.h ../../extra/mmelody.h ../../drivers/avr/pio.h ../../drivers/avr/system.h

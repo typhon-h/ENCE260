@@ -58,11 +58,11 @@ typedef enum
  */
 typedef struct
 {
-	uint8_t        bit_data;      // eg. 0b11000111 -- (1= wall, 0=hole)
-	uint8_t        pos;           // Current column/row
-	uint8_t        boundary_cond; // If pos>coundary_cond for wall deletion
-	WALL_TYPE      wall_type;     // COLUMN/ROW/OUT_OF_BOUNDS
-	WALL_DIRECTION direction;     // The direction of movement of wall
+	uint8_t        bit_data;          // eg. 0b11000111 -- (1= wall, 0=hole)
+	uint8_t        pos;               // Current column/row
+	uint8_t        boundary_cond;     // If pos>coundary_cond for wall deletion
+	WALL_TYPE      wall_type;         // COLUMN/ROW/OUT_OF_BOUNDS
+	WALL_DIRECTION direction;         // The direction of movement of wall
 } WallStruct;
 
 

@@ -25,7 +25,7 @@ void character_init(uint8_t life_count)
 
 	character_enable();
 
-	if (get_stun_condition())     //Prevent character being stunned on respawn
+	if (get_stun_condition())         //Prevent character being stunned on respawn
 	{
 		toggle_stun(false);
 	}
@@ -76,8 +76,9 @@ void character_disable()
 	display_pixel_set(character_info.x, character_info.y, false);
 }
 
+
 /* Turns display state for character only
-*/
+ */
 void character_enable()
 {
 	display_pixel_set(character_info.x, character_info.y, true);
@@ -89,6 +90,7 @@ void character_enable()
  */
 bool move_west()
 {
+	// Wont move character off west boundary or into a position already occupied (by a wall)
 	if ((WEST_CHARACTER_BOUNDARY < character_info.x) && !display_pixel_get(character_info.x - STEP_SIZE, character_info.y))
 	{
 		character_disable();
@@ -107,7 +109,7 @@ bool move_west()
  */
 bool move_east()
 {
-	// Wont move character off sern boundary or into a position already occupied (by a wall)
+	// Wont move character off east boundary or into a position already occupied (by a wall)
 	if ((EAST_CHARACTER_BOUNDARY > character_info.x) && !display_pixel_get(character_info.x + STEP_SIZE, character_info.y))
 	{
 		character_disable();
@@ -164,7 +166,7 @@ bool move_south()
  */
 void character_update()
 {
-	navswitch_update();     // Update navswitch input
+	navswitch_update();         // Update navswitch input
 
 	//Restores character state if passed by wall
 	if (!display_pixel_get(character_info.x, character_info.y))
