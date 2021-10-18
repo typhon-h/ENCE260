@@ -44,14 +44,14 @@ typedef enum
 	SOUTH,
 	WEST,
 	EAST
-} WALL_DIRECTION;
+} WALL_DIRECTION_t;
 
 
-// WALL_TYPE defiinition, wall is either along a COLUMN, ROW or it's OUT_OF_BOUNDS
+// WALL_TYPE_t defiinition, wall is either along a COLUMN, ROW or it's OUT_OF_BOUNDS
 typedef enum
 {
 	COLUMN, ROW, OUT_OF_BOUNDS
-} WALL_TYPE;
+} WALL_TYPE_t;
 
 
 /* Structure containing aspects of moving wall
@@ -61,8 +61,8 @@ typedef struct
 	uint8_t        bit_data;          // eg. 0b11000111 -- (1= wall, 0=hole)
 	uint8_t        pos;               // Current column/row
 	uint8_t        boundary_cond;     // If pos>coundary_cond for wall deletion
-	WALL_TYPE      wall_type;         // COLUMN/ROW/OUT_OF_BOUNDS
-	WALL_DIRECTION direction;         // The direction of movement of wall
+	WALL_TYPE_t      wall_type;         // COLUMN/ROW/OUT_OF_BOUNDS
+	WALL_DIRECTION_t direction;         // The direction of movement of wall
 } WallStruct;
 
 
@@ -92,7 +92,7 @@ void toggle_wall(bool display_on);
 
 
 /*  Moves active wall in direction defined by wall
- *  @brief: moves wall, sets WALL_TYPE to OUT_OF_BOUNDS is greater than ACTIVE_WALL.boundary_cond */
+ *  @brief: moves wall, sets WALL_TYPE_t to OUT_OF_BOUNDS is greater than ACTIVE_WALL.boundary_cond */
 void move_wall(void);
 
 

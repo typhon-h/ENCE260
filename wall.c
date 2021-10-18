@@ -39,7 +39,7 @@ static WallStruct decide_wall_type(uint8_t direction_seed, uint8_t hole_size_see
 	WallStruct new_wall;
 	uint8_t    wall_bitmap;
 
-	uint8_t wall_direction = (direction_seed) % NUM_OF_DIRECTIONS + 1;         // Random number in interval [1, NUM_OF_DIRECTIONS], decides wall direction
+	WALL_DIRECTION_t wall_direction = (direction_seed) % NUM_OF_DIRECTIONS + 1;         // Random number in interval [1, NUM_OF_DIRECTIONS], decides wall direction
 	uint8_t hole_size      = (hole_size_seed) % MAX_HOLE_SIZE + 1;             // Random number in interval [1, MAX_HOLE_SIZE], decides hole size
 
 	// Randomly shift hole along the wall, must be less than (wall_size - hole_size)
