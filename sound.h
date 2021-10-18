@@ -41,8 +41,4 @@ void sound_update(void);
 void sound_play(char song[]);
 
 
-/* Stop tune currently playing */
-void sound_stop(void);
-
-
 #endif

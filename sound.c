@@ -75,10 +75,3 @@ void sound_play(char song[])
 {
 	mmelody_play(melody, song);
 }
-
-
-/* Stop tune currently playing */
-void sound_stop()
-{
-	mmelody_play(melody, "");
-}
